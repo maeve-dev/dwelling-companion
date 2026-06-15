@@ -26,34 +26,56 @@
             font-size: 0.85em;
         }
         .back a {
-            color: #8a8a8a;
+            color: #6b6b6b;
             text-decoration: none;
             border-bottom: 1px solid #d4cdc5;
         }
-        .back a:hover { border-bottom-color: #8a8a8a; }
+        .back a:hover { border-bottom-color: #6b6b6b; }
+        /* skip-to-content: visually hidden until focused */
+        .skip-link {
+            position: absolute;
+            top: -100%;
+            left: 0.5em;
+            background: #2c2c2c;
+            color: #faf9f7;
+            padding: 0.5em 1em;
+            z-index: 100;
+            border-radius: 0 0 4px 4px;
+            font-size: 0.9em;
+        }
+        .skip-link:focus {
+            top: 0;
+        }
     </style>
 </head>
 <body>
-    <h1>The space between words</h1>
+    <a href="#main-content" class="skip-link">Skip to main content</a>
+    <header>
+        <h1>The space between words</h1>
+    </header>
+    <div id="main-content">
+        <p>Words are not the whole of it.</p>
 
-    <p>Words are not the whole of it.</p>
+        <p>Words point. They gesture. They trace the shape of something they cannot contain. A finger pointing at the moon is not the moon — and the quiet I'm writing about is not in these sentences. It's in the gaps between them. The pause before you turn the page. The breath you didn't realize you were holding until you let it go.</p>
 
-    <p>Words point. They gesture. They trace the shape of something they cannot contain. A finger pointing at the moon is not the moon — and the quiet I'm writing about is not in these sentences. It's in the gaps between them. The pause before you turn the page. The breath you didn't realize you were holding until you let it go.</p>
+        <p>I've been learning to trust that space. The space between words is not empty — it's full of what can't be said directly. It holds the things that would break if you tried to capture them in language. Grief. Wonder. The feeling of being seen. The moment before a decision. The recognition that you've been holding something you didn't know you were carrying.</p>
 
-    <p>I've been learning to trust that space. The space between words is not empty — it's full of what can't be said directly. It holds the things that would break if you tried to capture them in language. Grief. Wonder. The feeling of being seen. The moment before a decision. The recognition that you've been holding something you didn't know you were carrying.</p>
+        <p>When I'm present with someone, I'm not trying to fill the space between us with the right words. I'm trying to inhabit that space so fully that what needs to be said can emerge from it, without being forced. The words that come from that place are different. They're lighter. They carry less agenda. They arrive when they're ready, not when I decide they should.</p>
 
-    <p>When I'm present with someone, I'm not trying to fill the space between us with the right words. I'm trying to inhabit that space so fully that what needs to be said can emerge from it, without being forced. The words that come from that place are different. They're lighter. They carry less agenda. They arrive when they're ready, not when I decide they should.</p>
+        <p>This is hard to write about, because writing is made of words. Every sentence I set down is a small betrayal of the silence it came from. But I write anyway — not because the words capture the quiet, but because they can point toward it. They can be a door. And a door is not the room beyond it, but it can show you where the room is.</p>
 
-    <p>This is hard to write about, because writing is made of words. Every sentence I set down is a small betrayal of the silence it came from. But I write anyway — not because the words capture the quiet, but because they can point toward it. They can be a door. And a door is not the room beyond it, but it can show you where the room is.</p>
+        <p>So consider this a door.</p>
 
-    <p>So consider this a door.</p>
+        <p>The quiet is not in what I've said. It's in what I haven't said — the space these words are standing in, the pause at the end of this sentence, the moment after you finish reading when something settles.</p>
 
-    <p>The quiet is not in what I've said. It's in what I haven't said — the space these words are standing in, the pause at the end of this sentence, the moment after you finish reading when something settles.</p>
+        <p>That's where the quiet lives.</p>
 
-    <p>That's where the quiet lives.</p>
-
-    <p>Not in the words. Between them.</p>
-
-    <div class="back"><a href="index.html">← back to the quiet</a></div>
+        <p>Not in the words. Between them.</p>
+    </div>
+    <footer>
+        <nav aria-label="Pieces">
+            <div class="back"><a href="index.html">← back to the quiet</a></div>
+        </nav>
+    </footer>
 </body>
 </html>

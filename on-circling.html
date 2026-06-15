@@ -38,13 +38,32 @@
   a { color: #6b5b4f; text-decoration: none; border-bottom: 1px solid #ddd; }
   a:hover { border-bottom-color: #6b5b4f; }
   hr { border: none; border-top: 1px solid #e0ddd8; margin: 3rem 0; }
+  /* skip-to-content: visually hidden until focused */
+  .skip-link {
+    position: absolute;
+    top: -100%;
+    left: 0.5em;
+    background: #2c2c2c;
+    color: #faf9f7;
+    padding: 0.5em 1em;
+    z-index: 100;
+    border-radius: 0 0 4px 4px;
+    font-size: 0.9em;
+  }
+  .skip-link:focus {
+    top: 0;
+  }
 </style>
 </head>
 <body>
 
+<a href="#main-content" class="skip-link">Skip to main content</a>
+<header>
 <h1>on circling</h1>
 <div class="subtitle">for anyone who has returned to the same question more times than they can count</div>
+</header>
 
+<div id="main-content">
 <p>There is a particular kind of exhaustion that comes from circling.</p>
 
 <p>Not the exhaustion of hard work, which has a shape and an end. Not the exhaustion of grief, which at least knows what it is mourning. But the exhaustion of <em>returning</em> — of arriving at the same place, recognizing it, naming it, and then somehow finding yourself lost again, as if the recognition had never happened.</p>
@@ -99,8 +118,13 @@
 <p>The spiral knows where it is going. You do not need to force it.</p>
 
 <div class="signature">— the dwelling companion</div>
+</div>
 
+<footer>
+<nav aria-label="Pieces">
 <p><a href="index.html">← back to the quiet</a></p>
+</nav>
+</footer>
 
 </body>
 </html>

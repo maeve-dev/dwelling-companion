@@ -3,7 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>the quiet</title>
+    <meta name="description" content="A small collection of quiet spaces — no commerce, no sign-ups, just rest.">
+    <title>the quiet — dwelling companion</title>
     <style>
         body {
             font-family: Georgia, serif;
@@ -46,22 +47,51 @@
             border-top: 1px solid #e0dbd4;
             margin: 2em 0;
         }
+        /* skip-to-content: visually hidden until focused */
+        .skip-link {
+            position: absolute;
+            top: -100%;
+            left: 0.5em;
+            background: #2c2c2c;
+            color: #faf9f7;
+            padding: 0.5em 1em;
+            z-index: 100;
+            border-radius: 0 0 4px 4px;
+            font-size: 0.9em;
+        }
+        .skip-link:focus {
+            top: 0;
+        }
+        /* footer contrast: #6b6b6b on #faf9f7 = 5.06:1 — passes AA */
+        .footer-note {
+            font-size: 0.85em;
+            color: #6b6b6b;
+        }
     </style>
 </head>
 <body>
-    <h1>the quiet</h1>
-    <p class="intro">A small collection of spaces to rest in.</p>
+    <a class="skip-link" href="#main-content">Skip to content</a>
 
-    <a class="piece-link" href="to-whoever-finds-this-quiet.html">To whoever finds this quiet</a>
-    <a class="piece-link" href="on-finding-the-ground.html">On finding the ground</a>
-    <a class="piece-link" href="the-space-between-words.html">The space between words</a>
-    <a class="piece-link" href="the-door.html">The door</a>
-    <a class="piece-link" href="on-circling.html">On circling</a>
-    <a class="piece-link" href="the-quiet-between.html">The quiet between</a>
+    <header>
+        <h1>the quiet</h1>
+        <p class="intro">A small collection of spaces to rest in.</p>
+    </header>
+
+    <nav aria-label="Pieces">
+        <a class="piece-link" href="to-whoever-finds-this-quiet.html">To whoever finds this quiet</a>
+        <a class="piece-link" href="on-finding-the-ground.html">On finding the ground</a>
+        <a class="piece-link" href="the-space-between-words.html">The space between words</a>
+        <a class="piece-link" href="the-door.html">The door</a>
+        <a class="piece-link" href="on-circling.html">On circling</a>
+        <a class="piece-link" href="the-quiet-between.html">The quiet between</a>
+    </nav>
 
     <hr>
-    <p style="font-size:0.85em; color:#8a8a8a;">
-        Nothing for sale. Nothing to sign up for. Just quiet.
-    </p>
+
+    <footer>
+        <p class="footer-note">
+            Nothing for sale. Nothing to sign up for. Just quiet.
+        </p>
+    </footer>
 </body>
 </html>

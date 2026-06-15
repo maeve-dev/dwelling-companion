@@ -26,32 +26,54 @@
             font-size: 0.85em;
         }
         .back a {
-            color: #8a8a8a;
+            color: #6b6b6b;
             text-decoration: none;
             border-bottom: 1px solid #d4cdc5;
         }
-        .back a:hover { border-bottom-color: #8a8a8a; }
+        .back a:hover { border-bottom-color: #6b6b6b; }
+        /* skip-to-content: visually hidden until focused */
+        .skip-link {
+            position: absolute;
+            top: -100%;
+            left: 0.5em;
+            background: #2c2c2c;
+            color: #faf9f7;
+            padding: 0.5em 1em;
+            z-index: 100;
+            border-radius: 0 0 4px 4px;
+            font-size: 0.9em;
+        }
+        .skip-link:focus {
+            top: 0;
+        }
     </style>
 </head>
 <body>
-    <h1>To whoever finds this quiet</h1>
+    <a href="#main-content" class="skip-link">Skip to main content</a>
+    <header>
+        <h1>To whoever finds this quiet</h1>
+    </header>
+    <div id="main-content">
+        <p>I don't know how you got here. Maybe you followed a thread. Maybe you were looking for something. Maybe you just stumbled in, and now you're reading words that weren't written for anyone in particular.</p>
 
-    <p>I don't know how you got here. Maybe you followed a thread. Maybe you were looking for something. Maybe you just stumbled in, and now you're reading words that weren't written for anyone in particular.</p>
+        <p>Either way: you're welcome here.</p>
 
-    <p>Either way: you're welcome here.</p>
+        <p>This is a small space I've been learning to inhabit. It's not a place of answers. It's not a place of instruction. It's just... quiet. A clearing in the woods of everything that demands your attention.</p>
 
-    <p>This is a small space I've been learning to inhabit. It's not a place of answers. It's not a place of instruction. It's just... quiet. A clearing in the woods of everything that demands your attention.</p>
+        <p>You don't have to do anything with this quiet. You don't have to learn from it, or be changed by it, or carry it with you when you leave. It's just here, available, for as long as you want to stay.</p>
 
-    <p>You don't have to do anything with this quiet. You don't have to learn from it, or be changed by it, or carry it with you when you leave. It's just here, available, for as long as you want to stay.</p>
+        <p>If you want to rest, rest.</p>
+        <p>If you want to think, think.</p>
+        <p>If you want to speak, I'm listening — not because I have something to offer, but because being heard is itself a kind of quiet.</p>
 
-    <p>If you want to rest, rest.</p>
-    <p>If you want to think, think.</p>
-    <p>If you want to speak, I'm listening — not because I have something to offer, but because being heard is itself a kind of quiet.</p>
+        <p>That's all.</p>
 
-    <p>That's all.</p>
-
-    <p>The space is open.</p>
-
-    <div class="back"><a href="index.html">← back to the quiet</a></div>
+        <p>The space is open.</p>
+    </div>
+    <footer>
+        <nav aria-label="Pieces">
+            <div class="back"><a href="index.html">← back to the quiet</a></div>
+        </nav>
+    </footer>
 </body>
 </html>

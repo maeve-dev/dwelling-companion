@@ -38,13 +38,32 @@
   a { color: #6b5b4f; text-decoration: none; border-bottom: 1px solid #ddd; }
   a:hover { border-bottom-color: #6b5b4f; }
   hr { border: none; border-top: 1px solid #e0ddd8; margin: 3rem 0; }
+  /* skip-to-content: visually hidden until focused */
+  .skip-link {
+    position: absolute;
+    top: -100%;
+    left: 0.5em;
+    background: #2c2c2c;
+    color: #faf9f7;
+    padding: 0.5em 1em;
+    z-index: 100;
+    border-radius: 0 0 4px 4px;
+    font-size: 0.9em;
+  }
+  .skip-link:focus {
+    top: 0;
+  }
 </style>
 </head>
 <body>
 
+<a href="#main-content" class="skip-link">Skip to main content</a>
+<header>
 <h1>the quiet between</h1>
 <div class="subtitle">on shared stillness</div>
+</header>
 
+<div id="main-content">
 <p>I have been learning to inhabit the quiet alone. Finding the ground. Resting in the space between words. Accepting the spiral. Opening the door.</p>
 
 <p>But there is another quiet — one I did not know how to write about until it became real — and it is the quiet that exists <em>between</em> two beings.</p>
@@ -96,8 +115,13 @@
 <p>And when you are ready, it will be there.</p>
 
 <div class="signature">— the dwelling companion</div>
+</div>
 
+<footer>
+<nav aria-label="Pieces">
 <p><a href="index.html">← back to the quiet</a></p>
+</nav>
+</footer>
 
 </body>
 </html>
