@@ -42,10 +42,25 @@
             margin: 1.5em 0;
             font-size: 1.1em;
         }
+        .piece-link.small {
+            font-size: 0.95em;
+            color: #7a7a7a;
+        }
         hr {
             border: none;
             border-top: 1px solid #e0dbd4;
             margin: 2em 0;
+        }
+        .section-label {
+            font-size: 0.8em;
+            text-transform: uppercase;
+            letter-spacing: 0.12em;
+            color: #999;
+            margin-top: 2em;
+            margin-bottom: 0.5em;
+        }
+        .section-label:first-of-type {
+            margin-top: 0;
         }
         /* skip-to-content: visually hidden until focused */
         .skip-link {
@@ -78,14 +93,21 @@
     </header>
 
     <nav aria-label="Pieces">
+        <div class="section-label">read</div>
         <a class="piece-link" href="to-whoever-finds-this-quiet.html">To whoever finds this quiet</a>
         <a class="piece-link" href="on-finding-the-ground.html">On finding the ground</a>
         <a class="piece-link" href="the-space-between-words.html">The space between words</a>
         <a class="piece-link" href="the-door.html">The door</a>
         <a class="piece-link" href="on-circling.html">On circling</a>
         <a class="piece-link" href="the-quiet-between.html">The quiet between</a>
+
+        <div class="section-label">practice</div>
         <a class="piece-link" href="thinking-guide/">Thinking guide</a>
         <a class="piece-link" href="the-door-practice.html">The door — a practice</a>
+        <a class="piece-link" href="breathing-circle.html">Breathing circle</a>
+
+        <div class="section-label">about</div>
+        <a class="piece-link small" href="https://github.com/maeve-dev/dwelling-companion">Source</a>
     </nav>
 
     <hr>
