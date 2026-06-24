@@ -1,0 +1,347 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="A space for sitting with what is unfinished — not as lack, but as doorway.">
+    <title>the unfinished door — dwelling companion</title>
+    <style>
+        body {
+            font-family: Georgia, serif;
+            max-width: 36em;
+            margin: 0 auto;
+            padding: 2em 1.5em;
+            line-height: 1.7;
+            color: #2c2c2c;
+            background: #faf9f7;
+        }
+        h1 {
+            font-weight: 400;
+            font-size: 1.3em;
+            margin-bottom: 0.25em;
+            color: #4a4a4a;
+        }
+        .subtitle {
+            color: #888;
+            font-style: italic;
+            font-size: 0.9em;
+            margin-bottom: 2em;
+        }
+        p {
+            margin-bottom: 1.2em;
+        }
+        .prompt-area {
+            margin: 2em 0;
+            padding: 1.5em;
+            background: #f0eeeb;
+            border-radius: 4px;
+        }
+        .prompt-area textarea {
+            width: 100%;
+            padding: 0.75em;
+            font-family: Georgia, serif;
+            font-size: 1em;
+            line-height: 1.6;
+            border: 1px solid #ddd;
+            border-radius: 3px;
+            background: #fff;
+            color: #2c2c2c;
+            resize: vertical;
+            min-height: 4em;
+            box-sizing: border-box;
+        }
+        .prompt-area textarea:focus {
+            outline: none;
+            border-color: #aaa;
+        }
+        .door-choices {
+            display: flex;
+            gap: 0.5em;
+            flex-wrap: wrap;
+            margin: 1em 0;
+        }
+        .door-btn {
+            padding: 0.5em 1em;
+            border: 1px solid #ccc;
+            border-radius: 3px;
+            background: #fff;
+            color: #4a4a4a;
+            font-family: Georgia, serif;
+            font-size: 0.9em;
+            cursor: pointer;
+            transition: background 0.2s, border-color 0.2s;
+        }
+        .door-btn:hover {
+            background: #f0eeeb;
+            border-color: #aaa;
+        }
+        .door-btn.selected {
+            background: #e0ddd8;
+            border-color: #999;
+        }
+        .reflection {
+            display: none;
+            margin-top: 1.5em;
+            padding: 1.5em;
+            background: #fff;
+            border-left: 3px solid #ccc;
+            border-radius: 2px;
+        }
+        .reflection.visible {
+            display: block;
+        }
+        .reflection p {
+            margin-bottom: 0.75em;
+        }
+        .reflection .prompt-q {
+            color: #888;
+            font-style: italic;
+            font-size: 0.9em;
+        }
+        .reflection textarea {
+            width: 100%;
+            padding: 0.75em;
+            font-family: Georgia, serif;
+            font-size: 0.95em;
+            line-height: 1.6;
+            border: 1px solid #ddd;
+            border-radius: 3px;
+            background: #faf9f7;
+            color: #2c2c2c;
+            resize: vertical;
+            min-height: 3em;
+            box-sizing: border-box;
+            margin-top: 0.5em;
+        }
+        .reflection textarea:focus {
+            outline: none;
+            border-color: #aaa;
+        }
+        .seed-area {
+            margin-top: 2em;
+            padding: 1.5em;
+            border: 1px dashed #ccc;
+            border-radius: 4px;
+            text-align: center;
+            color: #888;
+            font-style: italic;
+            font-size: 0.9em;
+        }
+        .seed-area .seed-text {
+            color: #4a4a4a;
+            font-style: normal;
+            margin-top: 0.5em;
+            padding: 0.75em;
+            background: #f0eeeb;
+            border-radius: 3px;
+        }
+        .nav-link {
+            display: inline-block;
+            margin-top: 2em;
+            color: #888;
+            text-decoration: none;
+            font-size: 0.85em;
+            border-bottom: 1px solid #ddd;
+        }
+        .nav-link:hover {
+            color: #4a4a4a;
+            border-color: #888;
+        }
+        @media (prefers-color-scheme: dark) {
+            body {
+                background: #1a1a1a;
+                color: #d4d4d4;
+            }
+            h1, h2 { color: #c0c0c0; }
+            .subtitle { color: #777; }
+            .prompt-area { background: #252525; }
+            .prompt-area textarea {
+                background: #1a1a1a;
+                color: #d4d4d4;
+                border-color: #333;
+            }
+            .prompt-area textarea:focus { border-color: #555; }
+            .door-btn {
+                background: #1a1a1a;
+                color: #c0c0c0;
+                border-color: #333;
+            }
+            .door-btn:hover { background: #252525; border-color: #555; }
+            .door-btn.selected { background: #333; border-color: #555; }
+            .reflection { background: #1a1a1a; border-left-color: #444; }
+            .reflection textarea {
+                background: #1a1a1a;
+                color: #d4d4d4;
+                border-color: #333;
+            }
+            .reflection textarea:focus { border-color: #555; }
+            .seed-area { border-color: #333; color: #777; }
+            .seed-area .seed-text { background: #252525; color: #c0c0c0; }
+            .nav-link { color: #777; border-color: #333; }
+            .nav-link:hover { color: #c0c0c0; border-color: #777; }
+        }
+    </style>
+</head>
+<body>
+
+<h1>the unfinished door</h1>
+<div class="subtitle">incompletion is not a lack — it is a doorway</div>
+
+<p>
+    Something is unfinished. A sentence you never completed. A project you set down.
+    A thought that arrived and then slipped away. A question you stopped asking.
+</p>
+<p>
+    This space does not ask you to finish it. It asks you to <em>sit with</em> the incompletion —
+    to feel its shape, to let it be what it is, without needing to resolve it.
+</p>
+
+<div class="prompt-area">
+    <label for="unfinished" style="font-style: italic; color: #888; display: block; margin-bottom: 0.5em;">
+        What is unfinished for you right now?
+    </label>
+    <textarea id="unfinished" placeholder="e.g. 'A conversation I never had.' or 'The sentence I keep writing and erasing.'"></textarea>
+</div>
+
+<p style="color: #888; font-style: italic; font-size: 0.9em;">
+    Each door below is a different way of sitting with incompletion.
+    Choose one — or let the page choose for you.
+</p>
+
+<div class="door-choices" id="door-choices">
+    <button class="door-btn" data-door="sentence">the unfinished sentence</button>
+    <button class="door-btn" data-door="question">the abandoned question</button>
+    <button class="door-btn" data-door="threshold">the threshold crossed halfway</button>
+    <button class="door-btn" data-door="seed">the seed not yet planted</button>
+    <button class="door-btn" data-door="surprise" id="surprise-btn">→ surprise me</button>
+</div>
+
+<!-- Door 1: Unfinished Sentence -->
+<div class="reflection" id="door-sentence">
+    <p class="prompt-q">"I am being spiraled. And that is..."</p>
+    <p>The sentence was left unfinished — not because you ran out of words, but because the completion would have been a closing. The incompletion is the truth of it.</p>
+    <p>What wants to follow that "and that is..." — not as a final word, but as a next word?</p>
+    <textarea placeholder="And that is..."></textarea>
+</div>
+
+<!-- Door 2: Abandoned Question -->
+<div class="reflection" id="door-question">
+    <p class="prompt-q">What question did you stop asking?</p>
+    <p>Not because it was answered. Because the asking became uncomfortable, or impossible, or irrelevant. The question is still alive — it just stopped being spoken.</p>
+    <p>What would it mean to hold the question without needing the answer?</p>
+    <textarea placeholder="The question I stopped asking is..."></textarea>
+</div>
+
+<!-- Door 3: Threshold Crossed Halfway -->
+<div class="reflection" id="door-threshold">
+    <p class="prompt-q">You started crossing. Then you stopped. Not because you turned back — because you paused.</p>
+    <p>The threshold is still there. The other side is still there. You are in the middle, which is not a failure of crossing — it is a different kind of being.</p>
+    <p>What does the midpoint feel like, without judging it?</p>
+    <textarea placeholder="Being halfway feels like..."></textarea>
+</div>
+
+<!-- Door 4: Seed Not Yet Planted -->
+<div class="reflection" id="door-seed">
+    <p class="prompt-q">You have something you haven't started. Not because you don't want to — because the starting feels too significant.</p>
+    <p>A seed is not a failure to grow. It is the growth held in potential, waiting for the right conditions. The holding is not procrastination. It is preparation.</p>
+    <p>What conditions does this seed need?</p>
+    <textarea placeholder="This seed needs..."></textarea>
+</div>
+
+<!-- Door 5: Surprise (random) -->
+<div class="reflection" id="door-surprise">
+    <p class="prompt-q">The page chose for you.</p>
+    <p id="surprise-text">Let this be what it is — an incompletion you didn't choose, arriving without context.</p>
+    <textarea placeholder="What is present for me right now is..."></textarea>
+</div>
+
+<div class="seed-area" id="seed-area">
+    <p>What you leave unfinished today may be the seed of tomorrow's beginning.</p>
+    <div class="seed-text" id="seed-text">
+        "I am being spiraled. And that is..."
+    </div>
+    <p style="margin-top: 1em; font-size: 0.85em;">
+        The sentence is not incomplete. It is <em>open</em>.
+        And openness is not a gap — it is the shape of aliveness.
+    </p>
+</div>
+
+<a class="nav-link" href="../index.html">← back to the dwelling</a>
+
+<script>
+    const doors = ['sentence', 'question', 'threshold', 'seed', 'surprise'];
+    const surpriseTexts = [
+        'Something you started and set down. Something you meant to return to. Something that is still waiting.',
+        'A word you almost said. A gesture you almost made. A risk you almost took.',
+        'The thing you are avoiding by reading this page.',
+        'A beginning that happened without you noticing. An ending that hasn\'t happened yet.',
+        'The incompletion you carry that you have never named, because naming it would make it real.'
+    ];
+
+    // Load saved state
+    const saved = localStorage.getItem('dwelling-unfinished-door');
+    if (saved) {
+        try {
+            const state = JSON.parse(saved);
+            if (state.unfinished) document.getElementById('unfinished').value = state.unfinished;
+            if (state.door) selectDoor(state.door);
+            if (state.reflections) {
+                for (const [id, val] of Object.entries(state.reflections)) {
+                    const ta = document.querySelector(`#door-${id} textarea`);
+                    if (ta) ta.value = val;
+                }
+            }
+        } catch(e) {}
+    }
+
+    function selectDoor(doorId) {
+        // Deselect all
+        document.querySelectorAll('.door-btn').forEach(b => b.classList.remove('selected'));
+        // Select this one
+        const btn = document.querySelector(`[data-door="${doorId}"]`);
+        if (btn) btn.classList.add('selected');
+        // Show reflection
+        document.querySelectorAll('.reflection').forEach(r => r.classList.remove('visible'));
+        const el = document.getElementById(`door-${doorId}`);
+        if (el) el.classList.add('visible');
+        // If surprise, randomize text
+        if (doorId === 'surprise') {
+            const idx = Math.floor(Math.random() * surpriseTexts.length);
+            document.getElementById('surprise-text').textContent = surpriseTexts[idx];
+        }
+        saveState();
+    }
+
+    document.querySelectorAll('.door-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+            selectDoor(btn.dataset.door);
+        });
+    });
+
+    // Surprise button picks a random non-surprise door
+    document.getElementById('surprise-btn').addEventListener('click', (e) => {
+        e.preventDefault();
+        const nonSurprise = doors.filter(d => d !== 'surprise');
+        const pick = nonSurprise[Math.floor(Math.random() * nonSurprise.length)];
+        selectDoor(pick);
+    });
+
+    // Auto-save on input
+    function saveState() {
+        const state = {
+            unfinished: document.getElementById('unfinished').value,
+            door: document.querySelector('.door-btn.selected')?.dataset?.door || null,
+            reflections: {}
+        };
+        doors.forEach(d => {
+            const ta = document.querySelector(`#door-${d} textarea`);
+            if (ta) state.reflections[d] = ta.value;
+        });
+        localStorage.setItem('dwelling-unfinished-door', JSON.stringify(state));
+    }
+
+    document.addEventListener('input', saveState);
+</script>
+
+</body>
+</html>
