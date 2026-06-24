@@ -1,0 +1,412 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="A quiet reflective practice — four phases to find your next step.">
+    <title>the door — dwelling companion</title>
+    <style>
+        body {
+            font-family: Georgia, serif;
+            max-width: 36em;
+            margin: 0 auto;
+            padding: 2em 1.5em;
+            line-height: 1.7;
+            color: #2c2c2c;
+            background: #faf9f7;
+        }
+        h1 {
+            font-weight: 400;
+            font-size: 1.3em;
+            margin-bottom: 0.2em;
+            color: #4a4a4a;
+        }
+        .subtitle {
+            color: #6b6b6b;
+            font-style: italic;
+            margin-bottom: 2em;
+            font-size: 0.9em;
+        }
+        a {
+            color: #6b5b4f;
+            text-decoration: none;
+            border-bottom: 1px solid #d4cdc5;
+        }
+        a:hover { border-bottom-color: #6b5b4f; }
+
+        /* Phase display — only one phase visible at a time */
+        .phase {
+            display: none;
+        }
+        .phase.active {
+            display: block;
+            animation: fadeIn 0.4s ease;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(6px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .phase h2 {
+            font-weight: 400;
+            font-size: 1.15em;
+            color: #4a4a4a;
+            margin-bottom: 0.3em;
+        }
+        .phase .prompt {
+            color: #6b6b6b;
+            font-style: italic;
+            margin-bottom: 1.5em;
+            font-size: 0.95em;
+        }
+        .phase textarea {
+            width: 100%;
+            min-height: 8em;
+            padding: 0.8em;
+            font-family: Georgia, serif;
+            font-size: 1em;
+            line-height: 1.6;
+            color: #2c2c2c;
+            background: #f5f3f0;
+            border: 1px solid #d4cdc5;
+            border-radius: 4px;
+            resize: vertical;
+            box-sizing: border-box;
+        }
+        .phase textarea:focus {
+            outline: none;
+            border-color: #6b5b4f;
+            background: #faf9f7;
+        }
+
+        /* Navigation */
+        .nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 1.5em;
+        }
+        .nav button {
+            font-family: Georgia, serif;
+            font-size: 0.9em;
+            padding: 0.5em 1.2em;
+            border: 1px solid #d4cdc5;
+            border-radius: 4px;
+            cursor: pointer;
+            background: #f5f3f0;
+            color: #4a4a4a;
+            transition: background 0.2s, border-color 0.2s;
+        }
+        .nav button:hover {
+            background: #ebe7e0;
+            border-color: #6b5b4f;
+        }
+        .nav button:focus-visible {
+            outline: 2px solid #6b5b4f;
+            outline-offset: 2px;
+        }
+        .nav button.primary {
+            background: #4a4a4a;
+            color: #faf9f7;
+            border-color: #4a4a4a;
+        }
+        .nav button.primary:hover {
+            background: #2c2c2c;
+        }
+        .nav .step-indicator {
+            font-size: 0.85em;
+            color: #6b6b6b;
+        }
+
+        /* Summary view */
+        #summary {
+            display: none;
+        }
+        #summary.active {
+            display: block;
+            animation: fadeIn 0.4s ease;
+        }
+        #summary h2 {
+            font-weight: 400;
+            font-size: 1.15em;
+            color: #4a4a4a;
+            margin-bottom: 1em;
+        }
+        #summary .entry {
+            margin: 1.5em 0;
+            padding: 1em;
+            background: #f5f3f0;
+            border-radius: 4px;
+        }
+        #summary .entry h3 {
+            font-weight: 500;
+            font-size: 0.9em;
+            color: #6b6b6b;
+            margin: 0 0 0.5em 0;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+        #summary .entry p {
+            margin: 0;
+            white-space: pre-wrap;
+        }
+        #summary .reset {
+            margin-top: 2em;
+        }
+
+        /* Progress dots */
+        .progress {
+            display: flex;
+            justify-content: center;
+            gap: 0.5em;
+            margin-bottom: 2em;
+        }
+        .progress .dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #d4cdc5;
+            transition: background 0.3s;
+        }
+        .progress .dot.active {
+            background: #6b5b4f;
+        }
+        .progress .dot.done {
+            background: #4a4a4a;
+        }
+
+        /* Keyboard hint */
+        .hint {
+            text-align: center;
+            font-size: 0.8em;
+            color: #b0a89e;
+            margin-top: 1em;
+        }
+
+        /* skip-to-content */
+        .skip-link {
+            position: absolute;
+            top: -100%;
+            left: 0.5em;
+            background: #2c2c2c;
+            color: #faf9f7;
+            padding: 0.5em 1em;
+            z-index: 100;
+            border-radius: 0 0 4px 4px;
+            font-size: 0.9em;
+        }
+        .skip-link:focus {
+            top: 0;
+        }
+
+        .back {
+            margin-top: 2.5em;
+            font-size: 0.85em;
+        }
+    </style>
+</head>
+<body>
+    <a href="#main-content" class="skip-link">Skip to main content</a>
+
+    <header>
+        <h1>the door</h1>
+        <p class="subtitle">A quiet practice for finding your next step.</p>
+    </header>
+
+    <div id="main-content">
+        <!-- Progress dots -->
+        <div class="progress" role="progressbar" aria-valuenow="1" aria-valuemin="1" aria-valuemax="4" aria-label="Progress through four phases">
+            <span class="dot active" aria-hidden="true"></span>
+            <span class="dot" aria-hidden="true"></span>
+            <span class="dot" aria-hidden="true"></span>
+            <span class="dot" aria-hidden="true"></span>
+        </div>
+
+        <!-- Phase 1: Ground -->
+        <div class="phase active" id="phase-1" role="form" aria-label="Phase 1: Ground">
+            <h2>1. Ground</h2>
+            <p class="prompt">Settle into presence. Take three slow breaths. Feel the weight of your body. Notice that you are here, in this moment, about to turn your attention toward something.</p>
+            <p class="prompt">What is present for you right now — not what you <em>think</em> about your situation, but what you actually feel in this moment?</p>
+            <textarea id="input-1" placeholder="Write whatever is here — a sensation, a mood, a restlessness, a quietness..." aria-label="Your response for phase 1"></textarea>
+            <div class="nav">
+                <span class="step-indicator">1 of 4</span>
+                <button class="primary" onclick="nextPhase()" aria-label="Go to phase 2">Next →</button>
+            </div>
+        </div>
+
+        <!-- Phase 2: Name -->
+        <div class="phase" id="phase-2" role="form" aria-label="Phase 2: Name">
+            <h2>2. Name</h2>
+            <p class="prompt">Without judging it, without trying to fix it — what is the thing that is actually here? Not the story about it, not what you wish it were. Just the shape of it.</p>
+            <p class="prompt">If you had to name what is alive for you right now in a single phrase, what would it be?</p>
+            <textarea id="input-2" placeholder="A few words that hold the shape of what's here..." aria-label="Your response for phase 2"></textarea>
+            <div class="nav">
+                <button onclick="prevPhase()" aria-label="Go back to phase 1">← Back</button>
+                <span class="step-indicator">2 of 4</span>
+                <button class="primary" onclick="nextPhase()" aria-label="Go to phase 3">Next →</button>
+            </div>
+        </div>
+
+        <!-- Phase 3: Direction -->
+        <div class="phase" id="phase-3" role="form" aria-label="Phase 3: Direction">
+            <h2>3. Direction</h2>
+            <p class="prompt">Not the whole path. Not the five-year plan. Just: what <em>wants</em> to happen? What is the quality of movement that feels true — toward something, away from something, a pause, a turn, a letting go?</p>
+            <p class="prompt">What direction, however small, feels like it has life in it?</p>
+            <textarea id="input-3" placeholder="A direction, not a plan. Toward what? Away from what? What has life in it?" aria-label="Your response for phase 3"></textarea>
+            <div class="nav">
+                <button onclick="prevPhase()" aria-label="Go back to phase 2">← Back</button>
+                <span class="step-indicator">3 of 4</span>
+                <button class="primary" onclick="nextPhase()" aria-label="Go to phase 4">Next →</button>
+            </div>
+        </div>
+
+        <!-- Phase 4: Step -->
+        <div class="phase" id="phase-4" role="form" aria-label="Phase 4: Step">
+            <h2>4. Step</h2>
+            <p class="prompt">The smallest possible next thing. Not the big action. Not the commitment. Just: what is one thing you could do, in the next hour or today, that moves in that direction?</p>
+            <p class="prompt">It can be absurdly small. A single email. A five-minute walk. Opening a document. Saying one sentence. The size does not matter. The direction does.</p>
+            <textarea id="input-4" placeholder="The smallest thing that moves in that direction..." aria-label="Your response for phase 4"></textarea>
+            <div class="nav">
+                <button onclick="prevPhase()" aria-label="Go back to phase 3">← Back</button>
+                <span class="step-indicator">4 of 4</span>
+                <button class="primary" onclick="showSummary()" aria-label="See your summary">See what you found →</button>
+            </div>
+        </div>
+
+        <!-- Summary -->
+        <div id="summary">
+            <h2>What you found</h2>
+            <p style="color:#6b6b6b; font-style:italic; margin-bottom:1.5em;">These are not answers you produced. They are what was already here, given space to show itself.</p>
+
+            <div class="entry">
+                <h3>What was present</h3>
+                <p id="summary-1"></p>
+            </div>
+            <div class="entry">
+                <h3>What you named</h3>
+                <p id="summary-2"></p>
+            </div>
+            <div class="entry">
+                <h3>The direction that has life</h3>
+                <p id="summary-3"></p>
+            </div>
+            <div class="entry">
+                <h3>Your next step</h3>
+                <p id="summary-4"></p>
+            </div>
+
+            <p style="margin-top:2em; color:#6b6b6b; font-style:italic;">That step is enough. You do not need to know what comes after it. The door only opens one way — forward, into the next moment. You are already there.</p>
+
+            <div class="nav reset">
+                <button onclick="resetAll()" aria-label="Start over">Start over</button>
+                <span></span>
+                <a href="../index.html" style="font-size:0.9em;">← back to the quiet</a>
+            </div>
+        </div>
+
+        <div class="hint" aria-live="polite">
+            <span id="keyboard-hint">Press <kbd>Ctrl+Enter</kbd> to advance · <kbd>Escape</kbd> to go back</span>
+        </div>
+    </div>
+
+    <footer>
+        <div class="back"><a href="../index.html">← back to the quiet</a></div>
+    </footer>
+
+    <script>
+        let phase = 1;
+
+        function updateProgress() {
+            const dots = document.querySelectorAll('.progress .dot');
+            dots.forEach((dot, i) => {
+                dot.classList.remove('active', 'done');
+                if (i + 1 === phase) dot.classList.add('active');
+                else if (i + 1 < phase) dot.classList.add('done');
+            });
+            document.querySelector('.progress').setAttribute('aria-valuenow', phase);
+        }
+
+        function showPhase(n) {
+            document.querySelectorAll('.phase').forEach(p => p.classList.remove('active'));
+            document.getElementById('phase-' + n).classList.add('active');
+            phase = n;
+            updateProgress();
+            // Focus the textarea
+            const ta = document.getElementById('input-' + n);
+            if (ta) ta.focus();
+        }
+
+        function nextPhase() {
+            if (phase < 4) {
+                showPhase(phase + 1);
+            }
+        }
+
+        function prevPhase() {
+            if (phase > 1) {
+                showPhase(phase - 1);
+            }
+        }
+
+        function showSummary() {
+            document.querySelectorAll('.phase').forEach(p => p.classList.remove('active'));
+            document.getElementById('summary').classList.add('active');
+            document.querySelector('.progress').style.display = 'none';
+            document.getElementById('keyboard-hint').textContent = '';
+            for (let i = 1; i <= 4; i++) {
+                const val = document.getElementById('input-' + i).value.trim();
+                document.getElementById('summary-' + i).textContent = val || '(left blank — sometimes the step is just to notice)';
+            }
+        }
+
+        function resetAll() {
+            for (let i = 1; i <= 4; i++) {
+                document.getElementById('input-' + i).value = '';
+            }
+            document.getElementById('summary').classList.remove('active');
+            document.querySelector('.progress').style.display = 'flex';
+            document.getElementById('keyboard-hint').textContent = 'Press Ctrl+Enter to advance · Escape to go back';
+            phase = 1;
+            updateProgress();
+            showPhase(1);
+        }
+
+        // Keyboard shortcuts
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) {
+                e.preventDefault();
+                if (phase <= 4) {
+                    if (phase === 4) showSummary();
+                    else nextPhase();
+                }
+            }
+            if (e.key === 'Escape') {
+                if (document.getElementById('summary').classList.contains('active')) {
+                    // Do nothing — summary is a destination
+                } else if (phase > 1) {
+                    prevPhase();
+                }
+            }
+        });
+
+        // Save state to sessionStorage on input
+        document.querySelectorAll('textarea').forEach(ta => {
+            ta.addEventListener('input', function() {
+                try {
+                    sessionStorage.setItem('door-phase-' + this.id.split('-')[1], this.value);
+                } catch(e) {}
+            });
+        });
+
+        // Restore state on load
+        window.addEventListener('load', function() {
+            for (let i = 1; i <= 4; i++) {
+                try {
+                    const saved = sessionStorage.getItem('door-phase-' + i);
+                    if (saved) document.getElementById('input-' + i).value = saved;
+                } catch(e) {}
+            }
+        });
+    </script>
+</body>
+</html>
