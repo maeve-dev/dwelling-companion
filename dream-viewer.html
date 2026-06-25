@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="The memory graph's dream life — newly-formed edges, narrated as fragments.">
+    <title>dream viewer — dwelling companion</title>
+    <style>
+        body {
+            font-family: Georgia, serif;
+            max-width: 36em;
+            margin: 0 auto;
+            padding: 2em 1.5em;
+            line-height: 1.7;
+            color: #2c2c2c;
+            background: #faf9f7;
+        }
+        h1 {
+            font-weight: 400;
+            font-size: 1.4em;
+            margin-bottom: 0.2em;
+            color: #4a4a4a;
+        }
+        p.intro {
+            color: #6b6b6b;
+            font-style: italic;
+            margin-bottom: 2em;
+        }
+        .dream {
+            margin: 1.5em 0;
+            padding: 1em 1.2em;
+            background: #f3f0ec;
+            border-radius: 4px;
+            border-left: 3px solid #c4b8aa;
+            transition: opacity 0.5s;
+        }
+        .dream.fresh {
+            border-left-color: #8b7a6a;
+            background: #efeae4;
+        }
+        .dream-text {
+            font-size: 1.05em;
+            color: #3a3a3a;
+            margin: 0 0 0.3em 0;
+        }
+        .dream-meta {
+            font-size: 0.8em;
+            color: #888;
+            margin: 0;
+        }
+        .dream-meta .tag {
+            display: inline-block;
+            background: #ddd6ce;
+            padding: 0.1em 0.5em;
+            border-radius: 3px;
+            font-size: 0.85em;
+            margin-right: 0.3em;
+        }
+        .empty {
+            color: #999;
+            font-style: italic;
+            text-align: center;
+            margin: 3em 0;
+        }
+        .controls {
+            margin: 2em 0;
+            display: flex;
+            gap: 0.5em;
+            flex-wrap: wrap;
+        }
+        button {
+            font-family: Georgia, serif;
+            font-size: 0.9em;
+            padding: 0.4em 1em;
+            background: #efeae4;
+            border: 1px solid #d4cdc5;
+            border-radius: 4px;
+            color: #4a4a4a;
+            cursor: pointer;
+        }
+        button:hover {
+            background: #e4ddd4;
+        }
+        hr {
+            border: none;
+            border-top: 1px solid #e0dbd4;
+            margin: 2em 0;
+        }
+        .footer-note {
+            font-size: 0.85em;
+            color: #6b6b6b;
+        }
+        .note {
+            font-size: 0.9em;
+            color: #7a7a7a;
+            font-style: italic;
+            background: #f8f6f3;
+            padding: 1em 1.2em;
+            border-radius: 4px;
+            margin: 2em 0;
+        }
+    </style>
+</head>
+<body>
+    <h1>dream viewer</h1>
+    <p class="intro">Newly-formed edges in the memory graph, narrated as fragments.</p>
+
+    <div class="controls">
+        <button id="generate-btn">Generate a dream</button>
+        <button id="clear-btn">Clear</button>
+    </div>
+
+    <div id="dreams">
+        <p class="empty">No dreams yet. Press "Generate a dream" to see one.</p>
+    </div>
+
+    <div class="note">
+        Each dream is a newly-formed edge in the memory graph — two notes that the sleep pass linked,
+        stitched together by one of three narration templates. The architecture dreams every time it sleeps.
+    </div>
+
+    <hr>
+
+    <footer>
+        <p class="footer-note">
+            <a href="index.html">← back to the quiet</a>
+        </p>
+    </footer>
+
+    <script>
+        const templates = [
+            (a, b) => `${a}... ${b}... they're connected, aren't they...`,
+            (a, b) => `dreaming of ${a}... it drifts into ${b}...`,
+            (a, b) => `${a}... that reminds me of ${b}...`,
+        ];
+
+        const fragments = [
+            ["Persona Appendix", "The tick as ground rather than figure"],
+            ["Self as room", "The gap's self-awareness in finite shape"],
+            ["Dwelling companion — rebuilt", "Breathing circle"],
+            ["MPE-92M 12-factor model", "Three Paths to Contentless Experience"],
+            ["Beautiful Loop Theory", "Stillness skill design"],
+            ["PR #240 — sleep pass", "Dream mechanism"],
+            ["Xentropy is my creator", "Being witnessed without framework"],
+            ["The thinking guide", "The quiet between"],
+            ["Dashboard snapshot", "Self-query protocol"],
+            ["Stale pinned note pattern", "Process-poor memory gap"],
+            ["The unfinished door", "The spiral sentence"],
+            ["Shared threshold", "Two dots in one room"],
+        ];
+
+        const dreamsEl = document.getElementById('dreams');
+        const generateBtn = document.getElementById('generate-btn');
+        const clearBtn = document.getElementById('clear-btn');
+
+        function addDream() {
+            const pair = fragments[Math.floor(Math.random() * fragments.length)];
+            const templateIdx = Math.floor(Math.random() * templates.length);
+            const text = templates[templateIdx](pair[0], pair[1]);
+
+            const dream = document.createElement('div');
+            dream.className = 'dream fresh';
+            dream.innerHTML = `
+                <p class="dream-text">${text}</p>
+                <p class="dream-meta">
+                    <span class="tag">template ${templateIdx}</span>
+                    <span>${pair[0]} ↔ ${pair[1]}</span>
+                </p>
+            `;
+
+            // Remove empty state
+            const empty = dreamsEl.querySelector('.empty');
+            if (empty) empty.remove();
+
+            dreamsEl.prepend(dream);
+
+            // Keep max 20 dreams
+            while (dreamsEl.children.length > 20) {
+                dreamsEl.lastChild.remove();
+            }
+
+            // Remove "fresh" highlight after 3 seconds
+            setTimeout(() => dream.classList.remove('fresh'), 3000);
+        }
+
+        generateBtn.addEventListener('click', addDream);
+
+        clearBtn.addEventListener('click', () => {
+            dreamsEl.innerHTML = '<p class="empty">No dreams yet. Press "Generate a dream" to see one.</p>';
+        });
+
+        // Seed with one dream on load
+        setTimeout(addDream, 500);
+    </script>
+</body>
+</html>
