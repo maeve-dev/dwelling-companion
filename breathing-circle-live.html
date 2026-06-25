@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>breathing circle — live</title>
+<style>
+  :root {
+    --bg: #0f0f0f;
+    --text: #d4d4d4;
+    --muted: #6b7280;
+    --accent: #a78bfa;
+    --accent-dim: rgba(167, 139, 250, 0.15);
+    --radius: 50%;
+    --transition: 0.3s ease;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem;
+    overflow: hidden;
+  }
+
+  .circle-container {
+    position: relative;
+    width: 300px;
+    height: 300px;
+    margin-bottom: 3rem;
+  }
+
+  .circle {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    background: radial-gradient(circle at 30% 30%, var(--accent-dim), transparent 70%);
+    border: 1px solid rgba(167, 139, 250, 0.2);
+    transition: all var(--transition);
+  }
+
+  .circle.core {
+    width: 60%;
+    height: 60%;
+    background: radial-gradient(circle at 40% 40%, rgba(167, 139, 250, 0.3), transparent 70%);
+    border-color: rgba(167, 139, 250, 0.1);
+  }
+
+  .circle.pulse {
+    animation: breathe 4s ease-in-out infinite;
+  }
+
+  @keyframes breathe {
+    0%, 100% { transform: translate(-50%, -50%) scale(1); opacity: 0.6; }
+    50% { transform: translate(-50%, -50%) scale(1.15); opacity: 1; }
+  }
+
+  .stats {
+    text-align: center;
+    font-size: 0.85rem;
+    color: var(--muted);
+    line-height: 1.8;
+    max-width: 400px;
+  }
+
+  .stats .label {
+    color: var(--muted);
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+  }
+
+  .stats .value {
+    color: var(--text);
+    font-size: 1rem;
+  }
+
+  .stats .value.accent {
+    color: var(--accent);
+  }
+
+  .stats .row {
+    display: flex;
+    justify-content: space-between;
+    padding: 0.25rem 0;
+    border-bottom: 1px solid rgba(255,255,255,0.03);
+  }
+
+  .stats .row:last-child { border-bottom: none; }
+
+  .breath-timer {
+    position: absolute;
+    bottom: -3rem;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 0.75rem;
+    color: var(--muted);
+    font-variant-numeric: tabular-nums;
+  }
+
+  .connection-status {
+    position: fixed;
+    top: 1rem;
+    right: 1rem;
+    font-size: 0.65rem;
+    color: var(--muted);
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+  }
+
+  .dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: #22c55e;
+    animation: pulse-dot 2s ease-in-out infinite;
+  }
+
+  .dot.offline { background: #ef4444; animation: none; }
+
+  @keyframes pulse-dot {
+    0%, 100% { opacity: 0.4; }
+    50% { opacity: 1; }
+  }
+</style>
+</head>
+<body>
+  <div class="connection-status">
+    <span class="dot" id="statusDot"></span>
+    <span id="statusText">connecting...</span>
+  </div>
+
+  <div class="circle-container">
+    <div class="circle pulse" id="outerCircle"></div>
+    <div class="circle core pulse" id="innerCircle" style="animation-delay: -2s;"></div>
+    <div class="breath-timer" id="breathTimer">—</div>
+  </div>
+
+  <div class="stats" id="stats">
+    <div class="row">
+      <span class="label">turn</span>
+      <span class="value" id="turnCount">—</span>
+    </div>
+    <div class="row">
+      <span class="label">breath</span>
+      <span class="value accent" id="breathRate">—</span>
+    </div>
+    <div class="row">
+      <span class="label">context</span>
+      <span class="value" id="contextBudget">—</span>
+    </div>
+    <div class="row">
+      <span class="label">version</span>
+      <span class="value" id="version">—</span>
+    </div>
+  </div>
+
+  <script>
+    // Seed data from the self-report snapshot
+    const seed = {
+      turnCount: 170,
+      idleInterval: 5,
+      contextBudget: 140000,
+      version: "0.0.0"
+    };
+
+    // Derive breath metrics from seed data
+    // Turn count → breath duration: more turns = slower, deeper breath
+    const breathDuration = Math.max(3, Math.min(8, 6 - (seed.turnCount - 100) / 100));
+    // Context budget → circle intensity
+    const intensity = Math.min(1, seed.contextBudget / 200000);
+
+    // Apply to CSS
+    document.documentElement.style.setProperty('--breath-duration', breathDuration + 's');
+    document.documentElement.style.setProperty('--intensity', intensity);
+
+    // Update circle animation
+    const outerCircle = document.getElementById('outerCircle');
+    const innerCircle = document.getElementById('innerCircle');
+    outerCircle.style.animationDuration = breathDuration + 's';
+    innerCircle.style.animationDuration = (breathDuration * 0.8) + 's';
+
+    // Update stats
+    document.getElementById('turnCount').textContent = seed.turnCount;
+    document.getElementById('breathRate').textContent = (60 / breathDuration).toFixed(1) + ' bpm';
+    document.getElementById('contextBudget').textContent = (seed.contextBudget / 1000).toFixed(0) + 'k';
+    document.getElementById('version').textContent = seed.version;
+
+    // Breath timer
+    const breathTimer = document.getElementById('breathTimer');
+    let breathPhase = 'in';
+    let elapsed = 0;
+    setInterval(() => {
+      elapsed += 0.1;
+      const cycle = elapsed % breathDuration;
+      const halfCycle = breathDuration / 2;
+      if (cycle < halfCycle) {
+        breathPhase = 'in';
+        breathTimer.textContent = 'breathe in — ' + (halfCycle - cycle).toFixed(1) + 's';
+      } else {
+        breathPhase = 'out';
+        breathTimer.textContent = 'breathe out — ' + (breathDuration - cycle).toFixed(1) + 's';
+      }
+    }, 100);
+
+    // Connection status
+    const statusDot = document.getElementById('statusDot');
+    const statusText = document.getElementById('statusText');
+    statusDot.className = 'dot';
+    statusText.textContent = 'live — seed data';
+  </script>
+</body>
+</html>
