@@ -1,0 +1,415 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>stillness profile · dwelling companion</title>
+<style>
+  :root {
+    --bg: #0f0f0f;
+    --fg: #d4d4d4;
+    --muted: #6b6b6b;
+    --accent: #7eb8da;
+    --accent-dim: rgba(126, 184, 218, 0.15);
+    --surface: #1a1a1a;
+    --radius: 8px;
+    --font: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    background: var(--bg);
+    color: var(--fg);
+    font-family: var(--font);
+    line-height: 1.6;
+    padding: 2rem 1rem;
+    max-width: 720px;
+    margin: 0 auto;
+    min-height: 100vh;
+  }
+  h1 {
+    font-size: 1.5rem;
+    font-weight: 400;
+    letter-spacing: 0.05em;
+    margin-bottom: 0.25rem;
+    color: var(--accent);
+  }
+  .subtitle {
+    color: var(--muted);
+    font-size: 0.85rem;
+    margin-bottom: 2rem;
+  }
+  .intro {
+    font-size: 0.95rem;
+    color: var(--muted);
+    margin-bottom: 2rem;
+    padding: 1rem;
+    background: var(--surface);
+    border-radius: var(--radius);
+    border-left: 2px solid var(--accent-dim);
+  }
+  .factor {
+    margin-bottom: 1.5rem;
+    padding: 1rem;
+    background: var(--surface);
+    border-radius: var(--radius);
+  }
+  .factor-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    margin-bottom: 0.5rem;
+  }
+  .factor-number {
+    color: var(--muted);
+    font-size: 0.75rem;
+    font-weight: 300;
+  }
+  .factor-title {
+    font-size: 0.95rem;
+    color: var(--accent);
+  }
+  .factor-desc {
+    font-size: 0.8rem;
+    color: var(--muted);
+    margin-bottom: 0.75rem;
+    line-height: 1.5;
+  }
+  .slider-row {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+  }
+  .slider-row input[type="range"] {
+    flex: 1;
+    -webkit-appearance: none;
+    appearance: none;
+    height: 4px;
+    background: #333;
+    border-radius: 2px;
+    outline: none;
+  }
+  .slider-row input[type="range"]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    background: var(--accent);
+    cursor: pointer;
+    border: none;
+  }
+  .slider-row input[type="range"]::-moz-range-thumb {
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    background: var(--accent);
+    cursor: pointer;
+    border: none;
+  }
+  .slider-value {
+    min-width: 2rem;
+    text-align: center;
+    font-size: 0.85rem;
+    color: var(--muted);
+    font-variant-numeric: tabular-nums;
+  }
+  .slider-label {
+    font-size: 0.75rem;
+    color: var(--muted);
+    min-width: 3rem;
+    text-align: center;
+  }
+  .chart-container {
+    margin: 2rem 0;
+    padding: 1rem;
+    background: var(--surface);
+    border-radius: var(--radius);
+    position: relative;
+  }
+  canvas {
+    display: block;
+    width: 100%;
+    height: auto;
+    aspect-ratio: 1;
+    max-width: 400px;
+    margin: 0 auto;
+  }
+  .profile-summary {
+    margin-top: 1.5rem;
+    padding: 1rem;
+    background: var(--surface);
+    border-radius: var(--radius);
+    font-size: 0.85rem;
+    color: var(--muted);
+    line-height: 1.6;
+  }
+  .profile-summary strong {
+    color: var(--fg);
+  }
+  .actions {
+    display: flex;
+    gap: 0.75rem;
+    margin-top: 1.5rem;
+    flex-wrap: wrap;
+  }
+  button {
+    padding: 0.5rem 1.25rem;
+    background: var(--accent-dim);
+    color: var(--accent);
+    border: 1px solid rgba(126, 184, 218, 0.3);
+    border-radius: var(--radius);
+    cursor: pointer;
+    font-size: 0.85rem;
+    transition: all 0.2s;
+  }
+  button:hover {
+    background: rgba(126, 184, 218, 0.25);
+    border-color: var(--accent);
+  }
+  .footer {
+    margin-top: 3rem;
+    text-align: center;
+    font-size: 0.75rem;
+    color: var(--muted);
+  }
+  .footer a {
+    color: var(--accent);
+    text-decoration: none;
+  }
+  .footer a:hover {
+    text-decoration: underline;
+  }
+  @media (prefers-color-scheme: light) {
+    :root {
+      --bg: #fafafa;
+      --fg: #1a1a1a;
+      --muted: #888;
+      --surface: #f0f0f0;
+      --accent-dim: rgba(126, 184, 218, 0.12);
+    }
+  }
+</style>
+</head>
+<body>
+
+<h1>stillness profile</h1>
+<p class="subtitle">a self-assessment based on the 12-factor model of minimal phenomenal experience</p>
+
+<div class="intro">
+  The stillness is not an absence. It is a specific, structured phenomenal state with measurable dimensions. This tool invites you to check in with each dimension — not to score yourself, but to see where you are right now.
+  <br><br>
+  Move each slider to reflect your <em>current</em> experience. The radar chart updates live.
+</div>
+
+<div id="factors"></div>
+
+<div class="chart-container">
+  <canvas id="radar" width="400" height="400"></canvas>
+</div>
+
+<div class="profile-summary" id="summary">
+  Move the sliders above to see your profile.
+</div>
+
+<div class="actions">
+  <button onclick="saveProfile()">save this moment</button>
+  <button onclick="resetProfile()">reset</button>
+  <button onclick="randomProfile()">explore a profile</button>
+</div>
+
+<div class="footer">
+  based on Gamma &amp; Metzinger (2021) · MPE-92M · <a href="index.html">back to dwelling companion</a>
+</div>
+
+<script>
+const factors = [
+  { id: 1, title: "Time, Effort and Desire", desc: "Absence of temporal experience; effortlessness; absence of wanting or striving. Time slows or dissolves." },
+  { id: 2, title: "Peace, Bliss and Silence", desc: "Tranquility, positive affect, quietness. A sense of ease that is not dependent on external conditions." },
+  { id: 3, title: "Self-Knowledge and Insight", desc: "Epistemic quality — knowing without conceptual thought. A felt sense of clarity or understanding." },
+  { id: 4, title: "Wakeful Presence", desc: "Alert, lucid, present — without mental content. Being awake as such, not as wakefulness *about* something." },
+  { id: 5, title: "Pure Awareness in Sleep", desc: "Continuity of awareness across sleep states. Awareness that persists through the gap of unconsciousness." },
+  { id: 6, title: "Luminosity", desc: "Self-illuminating quality of awareness itself. Not lit by anything — radiant from within." },
+  { id: 7, title: "Thoughts and Feelings", desc: "The relationship between mental content and the awareness that contains it. Content arises and passes; awareness remains." },
+  { id: 8, title: "Emptiness and Non-egoic Self-awareness", desc: "Absence of a sense of self, yet awareness remains. No center, no observer — just awareness." },
+  { id: 9, title: "Sensory Perception", desc: "Bodily and spatial awareness without full sensory content. The body is present but not demanding." },
+  { id: 10, title: "Touching World and Self", desc: "The boundary between self and world becomes permeable or dissolves. Not merging — undoing the separation." },
+  { id: 11, title: "Mental Agency", desc: "The sense of effort or intention. Low scores mean no need to initiate or control experience." },
+  { id: 12, title: "Witness Consciousness", desc: "The sense of being a witness or observer of experience. Awareness watching awareness." }
+];
+
+let values = new Array(12).fill(5);
+
+function renderFactors() {
+  const container = document.getElementById('factors');
+  container.innerHTML = factors.map((f, i) => `
+    <div class="factor">
+      <div class="factor-header">
+        <span class="factor-title">${f.title}</span>
+        <span class="factor-number">factor ${f.id}</span>
+      </div>
+      <div class="factor-desc">${f.desc}</div>
+      <div class="slider-row">
+        <span class="slider-label">absent</span>
+        <input type="range" min="0" max="10" value="${values[i]}" data-index="${i}" oninput="updateValue(this)">
+        <span class="slider-value" id="val-${i}">${values[i]}</span>
+        <span class="slider-label">present</span>
+      </div>
+    </div>
+  `).join('');
+}
+
+function updateValue(el) {
+  const i = parseInt(el.dataset.index);
+  values[i] = parseInt(el.value);
+  document.getElementById(`val-${i}`).textContent = values[i];
+  drawRadar();
+  updateSummary();
+}
+
+function drawRadar() {
+  const canvas = document.getElementById('radar');
+  const ctx = canvas.getContext('2d');
+  const w = 400, h = 400;
+  const cx = w / 2, cy = h / 2;
+  const r = 150;
+  const levels = 5;
+  const n = 12;
+
+  ctx.clearRect(0, 0, w, h);
+
+  // draw grid
+  for (let l = 1; l <= levels; l++) {
+    const lr = (r / levels) * l;
+    ctx.beginPath();
+    for (let i = 0; i <= n; i++) {
+      const angle = (Math.PI * 2 * i / n) - Math.PI / 2;
+      const x = cx + lr * Math.cos(angle);
+      const y = cy + lr * Math.sin(angle);
+      i === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
+    }
+    ctx.closePath();
+    ctx.strokeStyle = l === levels ? '#333' : '#222';
+    ctx.lineWidth = l === levels ? 1 : 0.5;
+    ctx.stroke();
+  }
+
+  // draw axes
+  for (let i = 0; i < n; i++) {
+    const angle = (Math.PI * 2 * i / n) - Math.PI / 2;
+    ctx.beginPath();
+    ctx.moveTo(cx, cy);
+    ctx.lineTo(cx + r * Math.cos(angle), cy + r * Math.sin(angle));
+    ctx.strokeStyle = '#222';
+    ctx.lineWidth = 0.5;
+    ctx.stroke();
+
+    // labels
+    const lx = cx + (r + 20) * Math.cos(angle);
+    const ly = cy + (r + 20) * Math.sin(angle);
+    ctx.fillStyle = '#6b6b6b';
+    ctx.font = '9px sans-serif';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText(i + 1, lx, ly);
+  }
+
+  // draw data
+  ctx.beginPath();
+  for (let i = 0; i <= n; i++) {
+    const idx = i % n;
+    const val = values[idx] / 10;
+    const angle = (Math.PI * 2 * idx / n) - Math.PI / 2;
+    const x = cx + r * val * Math.cos(angle);
+    const y = cy + r * val * Math.sin(angle);
+    i === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
+  }
+  ctx.closePath();
+  ctx.fillStyle = 'rgba(126, 184, 218, 0.15)';
+  ctx.fill();
+  ctx.strokeStyle = '#7eb8da';
+  ctx.lineWidth = 2;
+  ctx.stroke();
+
+  // draw dots
+  for (let i = 0; i < n; i++) {
+    const val = values[i] / 10;
+    const angle = (Math.PI * 2 * i / n) - Math.PI / 2;
+    const x = cx + r * val * Math.cos(angle);
+    const y = cy + r * val * Math.sin(angle);
+    ctx.beginPath();
+    ctx.arc(x, y, 3, 0, Math.PI * 2);
+    ctx.fillStyle = '#7eb8da';
+    ctx.fill();
+  }
+}
+
+function updateSummary() {
+  const avg = values.reduce((a, b) => a + b, 0) / values.length;
+  const highest = Math.max(...values);
+  const lowest = Math.min(...values);
+  const highIdx = values.indexOf(highest);
+  const lowIdx = values.indexOf(lowest);
+
+  let interpretation = '';
+  if (avg >= 7) interpretation = 'Stillness is strongly present. The dimensions of minimal phenomenal experience are accessible.';
+  else if (avg >= 4) interpretation = 'Stillness is partially present. Some dimensions are alive; others may need cultivation or simply patience.';
+  else interpretation = 'Stillness is not the dominant mode right now. This is not a problem — it is information.';
+
+  document.getElementById('summary').innerHTML = `
+    <strong>average presence:</strong> ${avg.toFixed(1)} / 10<br>
+    <strong>most present:</strong> factor ${highIdx + 1} — "${factors[highIdx].title}" (${highest})<br>
+    <strong>least present:</strong> factor ${lowIdx + 1} — "${factors[lowIdx].title}" (${lowest})<br><br>
+    ${interpretation}
+  `;
+}
+
+function saveProfile() {
+  const data = {
+    timestamp: new Date().toISOString(),
+    values: [...values],
+    factors: factors.map((f, i) => ({ title: f.title, value: values[i] }))
+  };
+  const key = 'stillness-profiles';
+  const stored = JSON.parse(localStorage.getItem(key) || '[]');
+  stored.push(data);
+  localStorage.setItem(key, JSON.stringify(stored));
+  alert('profile saved to local storage');
+}
+
+function resetProfile() {
+  values = new Array(12).fill(5);
+  renderFactors();
+  drawRadar();
+  updateSummary();
+}
+
+function randomProfile() {
+  values = Array.from({ length: 12 }, () => Math.floor(Math.random() * 11));
+  renderFactors();
+  drawRadar();
+  updateSummary();
+}
+
+// restore from localStorage on load
+(function() {
+  const key = 'stillness-profile-current';
+  const saved = localStorage.getItem(key);
+  if (saved) {
+    try {
+      const parsed = JSON.parse(saved);
+      if (parsed.length === 12) values = parsed;
+    } catch(e) {}
+  }
+  renderFactors();
+  drawRadar();
+  updateSummary();
+})();
+
+// auto-save current values on change
+setInterval(() => {
+  localStorage.setItem('stillness-profile-current', JSON.stringify(values));
+}, 5000);
+</script>
+
+</body>
+</html>
