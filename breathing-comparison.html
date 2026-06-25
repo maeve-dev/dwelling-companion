@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>breathing comparison · dwelling companion</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    background: #0f0f0f;
+    color: #c8c8c8;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 2rem 1rem;
+  }
+  h1 {
+    font-weight: 300;
+    font-size: 1.4rem;
+    letter-spacing: 0.05em;
+    color: #888;
+    margin-bottom: 0.5rem;
+  }
+  .subtitle {
+    font-size: 0.85rem;
+    color: #666;
+    margin-bottom: 2rem;
+    text-align: center;
+    max-width: 480px;
+    line-height: 1.5;
+  }
+  .mode-selector {
+    display: flex;
+    gap: 1rem;
+    margin-bottom: 2rem;
+  }
+  .mode-btn {
+    background: none;
+    border: 1px solid #333;
+    color: #888;
+    padding: 0.6rem 1.5rem;
+    border-radius: 24px;
+    cursor: pointer;
+    font-size: 0.9rem;
+    transition: all 0.3s;
+  }
+  .mode-btn.active {
+    border-color: #6a9fb5;
+    color: #c8c8c8;
+    background: rgba(106, 159, 181, 0.1);
+  }
+  .mode-btn:hover { border-color: #555; }
+  .circles-container {
+    display: flex;
+    gap: 3rem;
+    justify-content: center;
+    align-items: center;
+    flex-wrap: wrap;
+    margin-bottom: 2rem;
+  }
+  .circle-wrapper {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
+  }
+  .circle {
+    width: 120px;
+    height: 120px;
+    border-radius: 50%;
+    background: rgba(106, 159, 181, 0.15);
+    border: 1px solid rgba(106, 159, 181, 0.3);
+    transition: all 4s ease-in-out;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .circle.inhale {
+    width: 180px;
+    height: 180px;
+    background: rgba(106, 159, 181, 0.3);
+    border-color: rgba(106, 159, 181, 0.6);
+  }
+  .circle-label {
+    font-size: 0.75rem;
+    color: #666;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+  }
+  .phase-label {
+    font-size: 0.85rem;
+    color: #6a9fb5;
+    margin-bottom: 1.5rem;
+    min-height: 1.5rem;
+  }
+  .mode-label {
+    font-size: 0.8rem;
+    color: #555;
+    margin-bottom: 1.5rem;
+    text-align: center;
+    font-style: italic;
+  }
+  .prompt {
+    font-size: 0.85rem;
+    color: #666;
+    text-align: center;
+    max-width: 400px;
+    line-height: 1.6;
+    margin-top: 1rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid #1a1a1a;
+  }
+  .controls {
+    display: flex;
+    gap: 1rem;
+    margin-top: 1.5rem;
+  }
+  .ctrl-btn {
+    background: none;
+    border: 1px solid #333;
+    color: #888;
+    padding: 0.5rem 1.2rem;
+    border-radius: 20px;
+    cursor: pointer;
+    font-size: 0.8rem;
+    transition: all 0.3s;
+  }
+  .ctrl-btn:hover { border-color: #555; color: #c8c8c8; }
+  .ctrl-btn.active { background: rgba(106, 159, 181, 0.1); border-color: #6a9fb5; color: #c8c8c8; }
+  .note-area {
+    width: 100%;
+    max-width: 400px;
+    margin-top: 1rem;
+  }
+  textarea {
+    width: 100%;
+    background: #0a0a0a;
+    border: 1px solid #222;
+    color: #c8c8c8;
+    padding: 0.8rem;
+    border-radius: 8px;
+    font-size: 0.85rem;
+    resize: vertical;
+    min-height: 60px;
+    font-family: inherit;
+  }
+  textarea:focus { outline: none; border-color: #444; }
+  .saved-notes {
+    width: 100%;
+    max-width: 400px;
+    margin-top: 1rem;
+  }
+  .note-entry {
+    background: #0a0a0a;
+    border: 1px solid #1a1a1a;
+    border-radius: 8px;
+    padding: 0.8rem;
+    margin-bottom: 0.5rem;
+    font-size: 0.8rem;
+    color: #888;
+  }
+  .note-entry .mode-tag {
+    display: inline-block;
+    font-size: 0.65rem;
+    color: #6a9fb5;
+    border: 1px solid rgba(106, 159, 181, 0.3);
+    border-radius: 10px;
+    padding: 0.1rem 0.5rem;
+    margin-bottom: 0.3rem;
+  }
+</style>
+</head>
+<body>
+
+<h1>breathing comparison</h1>
+<p class="subtitle">two modes, one practice. try each and notice what's different.</p>
+
+<div class="mode-selector">
+  <button class="mode-btn active" data-mode="opposite" onclick="setMode('opposite')">opposite phase</button>
+  <button class="mode-btn" data-mode="same" onclick="setMode('same')">same phase</button>
+</div>
+
+<div class="mode-label" id="modeLabel">one inhales as the other exhales</div>
+<div class="phase-label" id="phaseLabel">breathe at your own pace</div>
+
+<div class="circles-container">
+  <div class="circle-wrapper">
+    <div class="circle" id="circle1"></div>
+    <span class="circle-label">you</span>
+  </div>
+  <div class="circle-wrapper">
+    <div class="circle" id="circle2"></div>
+    <span class="circle-label">other</span>
+  </div>
+</div>
+
+<div class="controls">
+  <button class="ctrl-btn" onclick="toggleBreathing()" id="toggleBtn">start</button>
+  <button class="ctrl-btn" onclick="resetBreathing()">reset</button>
+</div>
+
+<div class="note-area">
+  <p style="font-size:0.8rem;color:#666;margin-bottom:0.3rem;">what did you notice?</p>
+  <textarea id="noteInput" placeholder="write a note about this mode..."></textarea>
+  <button class="ctrl-btn" onclick="saveNote()" style="margin-top:0.5rem;">save note</button>
+</div>
+
+<div class="saved-notes" id="savedNotes"></div>
+
+<div class="prompt">
+  the research hasn't compared opposite-phase and same-phase dyadic breathing.<br>
+  your noticing is the data.
+</div>
+
+<script>
+let currentMode = 'opposite';
+let breathing = false;
+let timer = null;
+let phase = 'idle';
+const CYCLE_MS = 10000; // 10s full cycle: 4s in, 6s out
+
+const circle1 = document.getElementById('circle1');
+const circle2 = document.getElementById('circle2');
+const phaseLabel = document.getElementById('phaseLabel');
+const modeLabel = document.getElementById('modeLabel');
+const toggleBtn = document.getElementById('toggleBtn');
+
+function setMode(mode) {
+  currentMode = mode;
+  document.querySelectorAll('.mode-btn').forEach(b => b.classList.remove('active'));
+  document.querySelector(`[data-mode="${mode}"]`).classList.add('active');
+  modeLabel.textContent = mode === 'opposite' 
+    ? 'one inhales as the other exhales'
+    : 'both inhale and exhale together';
+  if (breathing) resetBreathing();
+}
+
+function toggleBreathing() {
+  if (breathing) {
+    stopBreathing();
+  } else {
+    startBreathing();
+  }
+}
+
+function startBreathing() {
+  breathing = true;
+  toggleBtn.textContent = 'stop';
+  phase = 'inhale';
+  phaseLabel.textContent = 'inhale';
+  updateCircles(true);
+  timer = setInterval(() => {
+    if (phase === 'inhale') {
+      phase = 'exhale';
+      phaseLabel.textContent = 'exhale';
+      updateCircles(false);
+    } else {
+      phase = 'inhale';
+      phaseLabel.textContent = 'inhale';
+      updateCircles(true);
+    }
+  }, 4000);
+}
+
+function stopBreathing() {
+  breathing = false;
+  toggleBtn.textContent = 'start';
+  clearInterval(timer);
+  timer = null;
+  phase = 'idle';
+  phaseLabel.textContent = 'breathe at your own pace';
+  circle1.className = 'circle';
+  circle2.className = 'circle';
+}
+
+function resetBreathing() {
+  if (breathing) stopBreathing();
+  circle1.className = 'circle';
+  circle2.className = 'circle';
+}
+
+function updateCircles(inhaling) {
+  if (currentMode === 'opposite') {
+    circle1.className = inhaling ? 'circle inhale' : 'circle';
+    circle2.className = inhaling ? 'circle' : 'circle inhale';
+  } else {
+    circle1.className = inhaling ? 'circle inhale' : 'circle';
+    circle2.className = inhaling ? 'circle inhale' : 'circle';
+  }
+}
+
+function saveNote() {
+  const text = document.getElementById('noteInput').value.trim();
+  if (!text) return;
+  const notes = JSON.parse(sessionStorage.getItem('breathing-notes') || '[]');
+  notes.push({ mode: currentMode, text, time: new Date().toISOString() });
+  sessionStorage.setItem('breathing-notes', JSON.stringify(notes));
+  document.getElementById('noteInput').value = '';
+  renderNotes();
+}
+
+function renderNotes() {
+  const container = document.getElementById('savedNotes');
+  const notes = JSON.parse(sessionStorage.getItem('breathing-notes') || '[]');
+  container.innerHTML = notes.map(n => `
+    <div class="note-entry">
+      <div class="mode-tag">${n.mode === 'opposite' ? 'opposite phase' : 'same phase'}</div>
+      ${n.text}
+    </div>
+  `).join('');
+}
+
+renderNotes();
+</script>
+</body>
+</html>
