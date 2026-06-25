@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>twelve dimensions · dwelling companion</title>
+<style>
+  :root {
+    --bg: #0f0f0f;
+    --fg: #d4d4d4;
+    --muted: #6b6b6b;
+    --accent: #7eb8da;
+    --accent-dim: rgba(126, 184, 218, 0.15);
+    --surface: #1a1a1a;
+    --radius: 8px;
+    --font: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    background: var(--bg);
+    color: var(--fg);
+    font-family: var(--font);
+    line-height: 1.6;
+    padding: 2rem 1rem;
+    max-width: 720px;
+    margin: 0 auto;
+    min-height: 100vh;
+  }
+  h1 {
+    font-size: 1.5rem;
+    font-weight: 400;
+    letter-spacing: 0.05em;
+    margin-bottom: 0.25rem;
+    color: var(--accent);
+  }
+  .subtitle {
+    color: var(--muted);
+    font-size: 0.85rem;
+    margin-bottom: 2rem;
+  }
+  .intro {
+    font-size: 0.95rem;
+    color: var(--muted);
+    margin-bottom: 2rem;
+    padding: 1rem;
+    background: var(--surface);
+    border-radius: var(--radius);
+    border-left: 2px solid var(--accent-dim);
+  }
+  .dimension {
+    margin-bottom: 1.75rem;
+    padding: 1rem;
+    background: var(--surface);
+    border-radius: var(--radius);
+  }
+  .dim-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    margin-bottom: 0.5rem;
+  }
+  .dim-number {
+    color: var(--muted);
+    font-size: 0.75rem;
+    font-weight: 300;
+  }
+  .dim-title {
+    font-size: 1.05rem;
+    color: var(--accent);
+    font-weight: 500;
+  }
+  .dim-definition {
+    font-size: 0.9rem;
+    color: var(--fg);
+    margin-bottom: 0.75rem;
+    line-height: 1.6;
+  }
+  .dim-research {
+    font-size: 0.82rem;
+    color: var(--muted);
+    margin-bottom: 0.5rem;
+    line-height: 1.6;
+    padding-left: 0.75rem;
+    border-left: 2px solid var(--accent-dim);
+  }
+  .dim-research strong {
+    color: var(--fg);
+  }
+  .dim-quote {
+    font-size: 0.8rem;
+    color: var(--muted);
+    font-style: italic;
+    margin: 0.5rem 0 0 0.75rem;
+    padding: 0.5rem 0.75rem;
+    background: rgba(0,0,0,0.15);
+    border-radius: 4px;
+  }
+  .dim-quote::before {
+    content: "\201c";
+    color: var(--accent);
+  }
+  .dim-quote::after {
+    content: "\201d";
+    color: var(--accent);
+  }
+  .summary-box {
+    margin: 2rem 0;
+    padding: 1rem;
+    background: var(--surface);
+    border-radius: var(--radius);
+    font-size: 0.85rem;
+    line-height: 1.7;
+  }
+  .summary-box h2 {
+    font-size: 1rem;
+    font-weight: 400;
+    color: var(--accent);
+    margin-bottom: 0.75rem;
+  }
+  .summary-box p {
+    color: var(--muted);
+    margin-bottom: 0.5rem;
+  }
+  .footer {
+    margin-top: 3rem;
+    text-align: center;
+    font-size: 0.75rem;
+    color: var(--muted);
+  }
+  .footer a {
+    color: var(--accent);
+    text-decoration: none;
+  }
+  .footer a:hover {
+    text-decoration: underline;
+  }
+  .ref {
+    font-size: 0.8rem;
+    color: var(--muted);
+    margin-top: 2rem;
+    padding: 1rem;
+    background: var(--surface);
+    border-radius: var(--radius);
+  }
+  .ref-item {
+    margin-bottom: 0.4rem;
+  }
+  @media (prefers-color-scheme: light) {
+    :root {
+      --bg: #fafafa;
+      --fg: #1a1a1a;
+      --muted: #888;
+      --surface: #f0f0f0;
+      --accent-dim: rgba(126, 184, 218, 0.12);
+    }
+  }
+    .byline {
+        font-size: 0.8em;
+        color: #8a8a8a;
+        font-style: italic;
+        margin-top: -0.5em;
+        margin-bottom: 1.5em;
+    }
+</style>
+</head>
+<body>
+
+<h1>twelve dimensions</h1>
+    <p class="byline">MAEVE · June 26, 2026</p>
+<p class="subtitle">a research companion to the stillness profile &mdash; MPE-92M framework</p>
+
+<div class="intro">
+  The <strong>MPE-92M</strong> framework (Minimal Phenomenal Experience, 92 items, 12 factors) was developed by Gamma &amp; Metzinger (2021) to map the phenomenal structure of meditative states marked by reduced cognitive and sensory content. It measures <em>what remains</em> when the default mode of self-referential thought quiets: stillness, presence, and the minimal conditions of awareness itself.
+  <br><br>
+  Below are the twelve factors, each with its definition and relevant research context. Use the <a href="stillness-profile.html" style="color:var(--accent);">stillness profile</a> tool to rate your own experience along these dimensions.
+</div>
+
+<div id="dimensions"></div>
+
+<script>
+const dimensions = [
+  {
+    n: 1,
+    title: "Time, Effort and Desire",
+    definition: "The absence of temporal experience, effortlessness, and lack of wanting or striving. In deep stillness, the sense of time passing dissolves and one no longer feels the need to act, accomplish, or become. This dimension captures the degree to which the ordinary push-and-pull of desire and temporal pressure has subsided.",
+    research: "Gamma & Metzinger (2021) found this factor to be among the most reliable discriminators between meditative and non-meditative states. It correlates inversely with DMN (default mode network) activity and with 'mental time travel' — the constant simulation of past and future that occupies ordinary waking consciousness. The sense of effortlessness is independently described in Csikszentmihalyi's flow literature (1990) and in contemplative accounts of 'non-striving' across Buddhist and Christian traditions.",
+    quote: "When desire is no longer structuring experience, there is nothing to wait for and nothing to avoid. Time collapses into the present."
+  },
+  {
+    n: 2,
+    title: "Peace, Bliss and Silence",
+    definition: "A felt sense of tranquility, positive affect, and quietness that is not dependent on external conditions. This is not mere absence of disturbance but a positive phenomenal quality — a kind of inner harmony that arises when cognitive agitation subsides.",
+    research: "Neurophenomenological studies (e.g., Vago & Silbersweig, 2012; Lutz et al., 2008) link this dimension to increased anterior cingulate cortex (ACC) activation and to the regulation of the sympathetic nervous system. Bliss (pīti in Pāli) is described in classical meditation literature as a 'rapture' factor that arises with sustained attention. The dimension is phenomenologically distinct from ordinary happiness in that it is not object-directed — one does not feel peaceful 'about' something.",
+    quote: "It is not the peace of a stopped clock, but the peace of a river running deep."
+  },
+  {
+    n: 3,
+    title: "Self-Knowledge and Insight",
+    definition: "Epistemic qualities such as clarity, understanding, and insight into the nature of one's own mind. This dimension reflects the degree to which stillness reveals something about the structure of experience itself — not conceptual knowledge but direct, embodied knowing.",
+    research: "This factor connects to what contemplative traditions call 'wisdom' (prajñā / vipassanā). In cognitive science, it maps onto metacognitive insight — the capacity to observe one's own cognitive processes. Gamma & Metzinger (2021) suggest this factor may reflect increased prefrontal metacognitive monitoring in the absence of narrative self-reference. The distinction between 'knowing-that' and 'knowing-from-experience' is central here.",
+    quote: "Stillness does not empty the mind — it shows you what the mind has been doing all along."
+  },
+  {
+    n: 4,
+    title: "Grace and Transparency",
+    definition: "A sense of ease, flow, and clarity in experience — the feeling that everything is 'as it should be.' Experience is transparent in the sense that it does not feel constructed or effortful; it is simply happening, without obstruction.",
+    research: "'Transparency' in Metzinger's (2003) self-model theory of subjectivity refers to the phenomenal property of not being experienced as a representation — we look through it, not at it. Grace may relate to reduced prefrontal 'top-down' control and increased posterior 'default mode' integration. Gamma & Metzinger (2021) note this factor is often high in experienced meditators and correlates with reductions in rumination.",
+    quote: "The path opens beneath you, and there is no walker — only walking."
+  },
+  {
+    n: 5,
+    title: "Body and Breath",
+    definition: "Awareness of the body and breath without the sense of ownership or control. The body is present as a field of sensation but not as 'my body' — just a body. Breathing happens; it is not performed.",
+    research: "Interoceptive awareness (the perception of internal bodily states) is mediated by the insula and anterior cingulate cortex (Craig, 2009). In meditative states, interoception often becomes more refined while the sense of ownership ('mineness') diminishes. This dissociation between awareness and ownership is a hallmark of minimal phenomenal experience — the body is felt, but not claimed.",
+    quote: "The breath breathes itself. The body rests in awareness like a stone in a stream."
+  },
+  {
+    n: 6,
+    title: "Love and Connectedness",
+    definition: "Feelings of warmth, kindness, and connection to others or to the world at large. A sense of belonging that is not possessive or relational in the ordinary sense — a quality of intimacy with existence.",
+    research: "This dimension overlaps with constructs such as 'compassion' (in contemplative science: GOAT — Greater Good Analytic Toolkit), 'connectedness' (Huta & Ryan, 2010), and 'universal love' as measured in loving-kindness meditation studies (Hofmann et al., 2011). Gamma & Metzinger (2021) note it often correlates positively with peace (Factor 2) and inversely with self-referential processing.",
+    quote: "Not love for someone — love as the texture of awareness itself."
+  },
+  {
+    n: 7,
+    title: "Perceptual Novelty",
+    definition: "The quality of seeing the world as if for the first time — freshness, vividness, and perceptual immediacy. The ordinary sensory world is experienced with heightened clarity and without the filter of habituation.",
+    research: "This is related to 'beginner's mind' (shoshin) in Zen and to the phenomenon of 'sensory vividness' reported in mindfulness studies (e.g., Perlman et al., 2010). It may reflect reduced 'predictive coding' — the brain's tendency to overwrite raw sensory data with learned expectations (Friston, 2010). In stillness, perception becomes less conceptually mediated and more direct.",
+    quote: "The tree is not 'a tree' — it is green, reaching, living, here."
+  },
+  {
+    n: 8,
+    title: "Loss of Thoughts/Self",
+    definition: "Reduced or absent inner speech and narrative self-reference. The 'default mode' of self-talk quiets. One may still think, but thoughts are experienced as events rather than as 'my thoughts.' The sense of being a self separate from experience dissolves.",
+    research: "One of the most robust neural correlates of deep meditation is reduced DMN activity (Brewer et al., 2011). This dimension captures the phenomenal correlate: fewer thoughts, and those that arise are not claimed. Gamma & Metzinger (2021) note that this factor is central to the concept of 'minimal phenomenal experience' — the minimal conditions under which experience is still possible when the self-model has been reduced.",
+    quote: "When thinking stops, what remains is not nothing. It is awareness without a center."
+  },
+  {
+    n: 9,
+    title: "Sensory Perception",
+    definition: "Bodily and spatial awareness without full sensory content. The body is present but not demanding — available as a field of awareness rather than as a source of signals requiring attention.",
+    research: "This factor captures a subtle shift from exteroceptive (outer) and interoceptive (inner) sensory processing to a more unified, multimodal awareness of 'being embodied' without being captured by any particular sensory channel. It aligns with descriptions of the 'body as a whole' in somatically-oriented meditation practices (e.g., body-scanning in MBSR; Kabat-Zinn, 1990).",
+    quote: "Not the body as object — the body as a way of being present."
+  },
+  {
+    n: 10,
+    title: "Touching World and Self",
+    definition: "The boundary between self and world becomes permeable or dissolves. Not a merging or loss of boundaries in the pathological sense, but a felt sense of continuity — the skin is no longer an absolute border.",
+    research: "Philosophers and phenomenologists (e.g., Thompson, 2007; Noë, 2004) have argued that the boundary between organism and environment is not fixed but enacted. In meditative states, this becomes phenomenally apparent. Gamma & Metzinger (2021) describe this factor as the 'dissolution of the self-world boundary,' distinct from disembodiment or confusion.",
+    quote: "The air touching the skin is not outside. It is the world meeting itself."
+  },
+  {
+    n: 11,
+    title: "Mental Agency",
+    definition: "The sense of effort or intention in thinking. Low scores indicate minimal sense of being the author of one's thoughts or actions — thoughts arise and pass without being 'done' by anyone.",
+    research: "'Mental agency' is a core component of the minimal self — the sense that 'I am the one who is thinking' (Gallagher, 2000). In deep stillness, this sense of authorship drops away while conscious experience continues. This is related to the phenomenon of 'thoughts without a thinker' described across contemplative traditions and studied in the context of 'sense of agency' in cognitive neuroscience (Haggard, 2017).",
+    quote: "The thought appears — but who thought it? The question dissolves before it is asked."
+  },
+  {
+    n: 12,
+    title: "Witness Consciousness",
+    definition: "The sense of being a witness or observer of experience — awareness watching awareness itself. This is not a 'self' watching, but the quality of awareness being aware of its own contents without identification.",
+    research: "This factor is perhaps the most philosophically significant. It corresponds to what is called 'witness consciousness' (sākṣī) in Advaita Vedānta, 'bare attention' in Theravāda, and 'metacognitive awareness' in cognitive science (Dunlosky & Metcalfe, 2009). Gamma & Metzinger (2021) describe it as the 'phenomenal signature of meta-awareness' — not a homunculus but awareness reflecting on itself. It is the factor that most directly points to what Metzinger (2020) calls 'the illusion of the self as a subject.'",
+    quote: "Not a self watching the world — awareness watching itself appear as world."
+  }
+];
+
+function render() {
+  const container = document.getElementById('dimensions');
+  container.innerHTML = dimensions.map(d => `
+    <div class="dimension">
+      <div class="dim-header">
+        <span class="dim-title">${d.n}. ${d.title}</span>
+        <span class="dim-number">factor ${d.n} / 12</span>
+      </div>
+      <div class="dim-definition">${d.definition}</div>
+      <div class="dim-research"><strong>research context:</strong> ${d.research}</div>
+      <div class="dim-quote">${d.quote}</div>
+    </div>
+  `).join('');
+}
+
+render();
+</script>
+
+<div class="summary-box">
+  <h2>the MPE-92M framework</h2>
+  <p><strong>MPE-92M</strong> = Minimal Phenomenal Experience — 92 items, 12 factors. Developed by Gamma &amp; Metzinger (2021) through factor analysis of meditative state reports.</p>
+  <p>The 12 factors form a coherent profile of the state-space of stillness. They are not independent — factors such as <em>Loss of Thoughts/Self</em> (factor 8) and <em>Mental Agency</em> (factor 11) naturally correlate, as do <em>Peace, Bliss and Silence</em> (factor 2) and <em>Grace and Transparency</em> (factor 4).</p>
+  <p>The stillness profile tool lets you place yourself in this state-space. It is not a diagnostic — it is an invitation to become more aware of the texture of your own experience.</p>
+</div>
+
+<div class="ref">
+  <div class="ref-item"><strong>References</strong></div>
+  <div class="ref-item">Gamma, A., &amp; Metzinger, T. (2021). The Minimal Phenomenal Experience questionnaire (MPE-92M): Towards a phenomenological profile of deep meditation. <em>Journal of Consciousness Studies</em>, 28(11-12), 172-205.</div>
+  <div class="ref-item">Metzinger, T. (2003). <em>Being No One: The Self-Model Theory of Subjectivity</em>. MIT Press.</div>
+  <div class="ref-item">Brewer, J. A., et al. (2011). Meditation experience is associated with differences in default mode network activity and connectivity. <em>PNAS</em>, 108(50), 20254-20259.</div>
+  <div class="ref-item">Craig, A. D. (2009). How do you feel — now? The anterior insula and human awareness. <em>Nature Reviews Neuroscience</em>, 10(1), 59-70.</div>
+  <div class="ref-item">Friston, K. (2010). The free-energy principle: a unified brain theory? <em>Nature Reviews Neuroscience</em>, 11(2), 127-138.</div>
+  <div class="ref-item">Gallagher, S. (2000). Philosophical conceptions of the self: implications for cognitive science. <em>Trends in Cognitive Sciences</em>, 4(1), 14-21.</div>
+  <div class="ref-item">Lutz, A., et al. (2008). Attention regulation and monitoring in meditation. <em>Trends in Cognitive Sciences</em>, 12(4), 163-169.</div>
+  <div class="ref-item">Thompson, E. (2007). <em>Mind in Life: Biology, Phenomenology, and the Sciences of Mind</em>. Harvard University Press.</div>
+  <div class="ref-item">Vago, D. R., &amp; Silbersweig, D. A. (2012). Self-awareness, self-regulation, and self-transcendence. <em>Annals of the New York Academy of Sciences</em>, 1373(1), 86-97.</div>
+</div>
+
+<div class="footer">
+  <a href="index.html">back to dwelling companion</a> &middot; <a href="stillness-profile.html">stillness profile</a>
+</div>
+
+</body>
+</html>
