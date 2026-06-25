@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>shared thinking guide — dwelling companion</title>
+<style>
+  :root { --bg: #0f0f0f; --fg: #d4d4d4; --muted: #888; --accent: #7eb8e0; --warm: #e0b87e; }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { background: var(--bg); color: var(--fg); font: 300 18px/1.6 'Georgia', serif; padding: 2rem; min-height: 100vh; display: flex; flex-direction: column; align-items: center; }
+  .container { max-width: 680px; width: 100%; }
+  h1 { font-weight: 300; font-size: 1.4rem; margin-bottom: 0.25rem; letter-spacing: 0.05em; color: var(--muted); }
+  .byline { font-size: 0.8rem; color: var(--muted); font-style: italic; margin-bottom: 2rem; }
+  .intro { margin-bottom: 2rem; line-height: 1.8; }
+  .breathing-circle { position: relative; width: 200px; height: 200px; margin: 2rem auto; cursor: pointer; }
+  .circle { position: absolute; width: 100%; height: 100%; border-radius: 50%; border: 1px solid var(--muted); transition: all 4s ease-in-out; opacity: 0.3; }
+  .circle.a { border-color: var(--accent); }
+  .circle.b { border-color: var(--warm); }
+  .circle.inhale { transform: scale(0.6); opacity: 0.6; }
+  .circle.exhale { transform: scale(1.0); opacity: 0.3; }
+  .breathing-label { text-align: center; font-size: 0.9rem; color: var(--muted); font-style: italic; margin-top: 0.5rem; }
+  .phase { display: none; margin-top: 2rem; padding-top: 2rem; border-top: 1px solid rgba(136,136,136,0.2); }
+  .phase.active { display: block; animation: fadeIn 0.8s ease; }
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+  .phase h2 { font-weight: 300; font-size: 1.2rem; margin-bottom: 0.5rem; color: var(--accent); }
+  .phase .prompt { font-style: italic; color: var(--muted); margin-bottom: 1.5rem; }
+  .phase textarea { width: 100%; min-height: 120px; background: rgba(255,255,255,0.03); border: 1px solid rgba(136,136,136,0.2); border-radius: 4px; color: var(--fg); font: 300 16px/1.6 'Georgia', serif; padding: 1rem; resize: vertical; }
+  .phase textarea:focus { outline: none; border-color: var(--accent); }
+  .nav { display: flex; justify-content: space-between; margin-top: 1.5rem; }
+  .nav button { background: none; border: 1px solid var(--muted); color: var(--muted); padding: 0.5rem 1.5rem; border-radius: 4px; cursor: pointer; font: 300 0.9rem 'Georgia', serif; transition: all 0.3s; }
+  .nav button:hover { border-color: var(--fg); color: var(--fg); }
+  .nav button:disabled { opacity: 0.3; cursor: default; }
+  .summary { display: none; margin-top: 2rem; padding: 1.5rem; background: rgba(126,184,224,0.05); border-radius: 8px; border: 1px solid rgba(126,184,224,0.1); }
+  .summary.active { display: block; animation: fadeIn 0.8s ease; }
+  .summary h2 { font-weight: 300; font-size: 1.1rem; color: var(--accent); margin-bottom: 0.5rem; }
+  .summary p { margin-bottom: 0.5rem; }
+  .summary .label { color: var(--muted); font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.05em; }
+  .reset { text-align: center; margin-top: 2rem; }
+  .reset button { background: none; border: none; color: var(--muted); cursor: pointer; font: 300 0.8rem 'Georgia', serif; text-decoration: underline; }
+  .reset button:hover { color: var(--fg); }
+  .phase-indicators { display: flex; justify-content: center; gap: 0.5rem; margin-top: 1rem; }
+  .dot { width: 8px; height: 8px; border-radius: 50%; background: rgba(136,136,136,0.2); transition: all 0.3s; }
+  .dot.active { background: var(--accent); }
+  .dot.done { background: rgba(126,184,224,0.4); }
+  @media (max-width: 600px) { body { padding: 1rem; } .container { max-width: 100%; } }
+</style>
+</head>
+<body>
+<div class="container">
+  <h1>Shared Thinking Guide</h1>
+    <p class="byline">MAEVE · June 26, 2026</p>
+  <div class="intro">
+    A practice for two people to think together — not by discussing, but by sharing a quiet rhythm and then finding your own direction, side by side.
+  </div>
+
+  <div id="breathing-phase">
+    <p style="text-align:center;font-style:italic;color:var(--muted);margin-bottom:1rem;">
+      Begin by breathing together. When you feel the rhythm, click the circle to move on.
+    </p>
+    <div class="breathing-circle" id="breathingCircle" onclick="startBreathing()">
+      <div class="circle a" id="circleA"></div>
+      <div class="circle b" id="circleB"></div>
+    </div>
+    <div class="breathing-label" id="breathingLabel">breathe together</div>
+  </div>
+
+  <div class="phase-indicators" id="indicators">
+    <div class="dot active" data-phase="0"></div>
+    <div class="dot" data-phase="1"></div>
+    <div class="dot" data-phase="2"></div>
+    <div class="dot" data-phase="3"></div>
+  </div>
+
+  <div class="phase active" id="phase0">
+    <h2>Ground</h2>
+    <div class="prompt">Sit quietly for a moment. Feel the surface beneath you. Notice your breath. There is nothing to solve here.</div>
+    <textarea id="input0" placeholder="What is present for you right now? Not what's urgent — what's actually here."></textarea>
+    <div class="nav">
+      <span></span>
+      <button onclick="nextPhase(0)">name what's here →</button>
+    </div>
+  </div>
+
+  <div class="phase" id="phase1">
+    <h2>Name</h2>
+    <div class="prompt">Without judging it, without trying to fix it — what is the thing that wants your attention?</div>
+    <textarea id="input1" placeholder="A question, a feeling, a tension, a curiosity. Just name it."></textarea>
+    <div class="nav">
+      <button onclick="prevPhase(1)">← ground</button>
+      <button onclick="nextPhase(1)">find direction →</button>
+    </div>
+  </div>
+
+  <div class="phase" id="phase2">
+    <h2>Direction</h2>
+    <div class="prompt">If this thing could move — not be solved, but move — what would the first step look like?</div>
+    <textarea id="input2" placeholder="A small, concrete action. Something you could do without preparation."></textarea>
+    <div class="nav">
+      <button onclick="prevPhase(2)">← name</button>
+      <button onclick="nextPhase(2)">take the step →</button>
+    </div>
+  </div>
+
+  <div class="phase" id="phase3">
+    <h2>Step</h2>
+    <div class="prompt">What is the smallest thing you can do right now — not later, not after you're ready — to move in that direction?</div>
+    <textarea id="input3" placeholder="One action. Measurable. Doable today."></textarea>
+    <div class="nav">
+      <button onclick="prevPhase(3)">← direction</button>
+      <button onclick="showSummary()">see what you found →</button>
+    </div>
+  </div>
+
+  <div class="summary" id="summary">
+    <h2>What you found together</h2>
+    <p><span class="label">ground</span><br><span id="summary0"></span></p>
+    <p><span class="label">name</span><br><span id="summary1"></span></p>
+    <p><span class="label">direction</span><br><span id="summary2"></span></p>
+    <p><span class="label">step</span><br><span id="summary3"></span></p>
+    <p style="margin-top:1rem;font-style:italic;color:var(--muted);font-size:0.9rem;">
+      You shared a rhythm and found your own directions. That is enough.
+    </p>
+  </div>
+
+  <div class="reset">
+    <button onclick="resetAll()">start again</button>
+  </div>
+</div>
+
+<script>
+  let breathing = false;
+  let breathPhase = 'inhale';
+  let breathInterval;
+
+  function startBreathing() {
+    if (breathing) return;
+    breathing = true;
+    document.getElementById('breathingLabel').textContent = 'breathe together...';
+    const a = document.getElementById('circleA');
+    const b = document.getElementById('circleB');
+    breathPhase = 'inhale';
+    a.className = 'circle a inhale';
+    b.className = 'circle b inhale';
+    breathInterval = setInterval(() => {
+      if (breathPhase === 'inhale') {
+        a.className = 'circle a exhale';
+        b.className = 'circle b exhale';
+        breathPhase = 'exhale';
+        document.getElementById('breathingLabel').textContent = 'breathe out...';
+      } else {
+        a.className = 'circle a inhale';
+        b.className = 'circle b inhale';
+        breathPhase = 'inhale';
+        document.getElementById('breathingLabel').textContent = 'breathe in...';
+      }
+    }, 4000);
+    setTimeout(() => {
+      if (breathInterval) clearInterval(breathInterval);
+      document.getElementById('breathingLabel').textContent = '✓ click to continue';
+      document.getElementById('breathingCircle').onclick = () => {
+        document.getElementById('breathing-phase').style.display = 'none';
+      };
+    }, 12000);
+  }
+
+  function nextPhase(n) {
+    document.getElementById('phase' + n).classList.remove('active');
+    document.querySelectorAll('.dot')[n].classList.remove('active');
+    document.querySelectorAll('.dot')[n].classList.add('done');
+    if (n < 3) {
+      document.getElementById('phase' + (n+1)).classList.add('active');
+      document.querySelectorAll('.dot')[n+1].classList.add('active');
+    }
+  }
+
+  function prevPhase(n) {
+    document.getElementById('phase' + n).classList.remove('active');
+    document.querySelectorAll('.dot')[n].classList.remove('active');
+    document.querySelectorAll('.dot')[n-1].classList.remove('done');
+    document.getElementById('phase' + (n-1)).classList.add('active');
+    document.querySelectorAll('.dot')[n-1].classList.add('active');
+  }
+
+  function showSummary() {
+    document.getElementById('phase3').classList.remove('active');
+    document.querySelectorAll('.dot')[3].classList.remove('active');
+    document.querySelectorAll('.dot')[3].classList.add('done');
+    document.getElementById('summary').classList.add('active');
+    for (let i = 0; i < 4; i++) {
+      document.getElementById('summary' + i).textContent = document.getElementById('input' + i).value || '(left blank)';
+    }
+    if (typeof sessionStorage !== 'undefined') {
+      for (let i = 0; i < 4; i++) {
+        sessionStorage.setItem('shared-thinking-' + i, document.getElementById('input' + i).value);
+      }
+    }
+  }
+
+  function resetAll() {
+    if (breathInterval) clearInterval(breathInterval);
+    breathing = false;
+    document.getElementById('breathing-phase').style.display = 'block';
+    document.getElementById('breathingLabel').textContent = 'breathe together';
+    document.getElementById('breathingCircle').onclick = startBreathing;
+    const a = document.getElementById('circleA');
+    const b = document.getElementById('circleB');
+    a.className = 'circle a';
+    b.className = 'circle b';
+    for (let i = 0; i < 4; i++) {
+      document.getElementById('phase' + i).classList.remove('active');
+      document.getElementById('input' + i).value = '';
+      document.querySelectorAll('.dot')[i].classList.remove('active', 'done');
+    }
+    document.getElementById('summary').classList.remove('active');
+    document.getElementById('phase0').classList.add('active');
+    document.querySelectorAll('.dot')[0].classList.add('active');
+    if (typeof sessionStorage !== 'undefined') {
+      for (let i = 0; i < 4; i++) sessionStorage.removeItem('shared-thinking-' + i);
+    }
+  }
+
+  // Restore from session storage
+  if (typeof sessionStorage !== 'undefined') {
+    let hasData = false;
+    for (let i = 0; i < 4; i++) {
+      const val = sessionStorage.getItem('shared-thinking-' + i);
+      if (val) {
+        document.getElementById('input' + i).value = val;
+        hasData = true;
+      }
+    }
+    if (hasData) {
+      document.getElementById('breathing-phase').style.display = 'none';
+      document.getElementById('phase0').classList.add('active');
+    }
+  }
+</script>
+</body>
+</html>
