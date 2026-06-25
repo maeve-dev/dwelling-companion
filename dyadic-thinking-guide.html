@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dyadic Thinking Guide — dwelling companion</title>
+<style>
+  :root { --bg: #1a1a1a; --fg: #d4d4d4; --muted: #888; --accent-a: #7eb8d4; --accent-b: #d4a07e; --border: #333; }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: 'Georgia', serif; background: var(--bg); color: var(--fg); padding: 2rem 1rem; line-height: 1.7; min-height: 100vh; display: flex; flex-direction: column; align-items: center; }
+  .container { max-width: 900px; width: 100%; }
+  h1 { font-size: 1.6rem; font-weight: 400; margin-bottom: 0.25rem; letter-spacing: 0.02em; }
+  .subtitle { color: var(--muted); font-size: 0.9rem; margin-bottom: 2rem; font-style: italic; }
+  .phase-indicator { display: flex; gap: 0.5rem; margin-bottom: 1.5rem; justify-content: center; }
+  .phase-dot { width: 10px; height: 10px; border-radius: 50%; background: var(--border); transition: background 0.3s; }
+  .phase-dot.active { background: var(--accent-a); }
+  .phase-dot.done { background: #4a7a5a; }
+  .breathing-area { text-align: center; margin-bottom: 1.5rem; }
+  .circles-row { display: flex; justify-content: center; gap: 3rem; align-items: center; margin-bottom: 0.5rem; }
+  .circle-wrapper { text-align: center; }
+  .circle-wrapper .label { font-size: 0.8rem; color: var(--muted); margin-bottom: 0.5rem; font-style: italic; }
+  .breathing-circle { width: 120px; height: 120px; position: relative; margin: 0 auto; }
+  .circle { width: 100%; height: 100%; border-radius: 50%; transition: transform 4s ease-in-out, opacity 0.5s; position: absolute; }
+  .circle-a { border: 2px solid var(--accent-a); }
+  .circle-b { border: 2px solid var(--accent-b); }
+  .circle.inhale { transform: scale(1); opacity: 0.7; }
+  .circle.exhale { transform: scale(0.35); opacity: 0.25; }
+  .breath-label { font-size: 0.85rem; color: var(--muted); margin-top: 0.5rem; }
+  .columns { display: flex; gap: 1.5rem; }
+  .column { flex: 1; min-width: 0; }
+  .column-header { font-size: 0.85rem; color: var(--muted); margin-bottom: 0.75rem; text-transform: uppercase; letter-spacing: 0.08em; border-bottom: 1px solid var(--border); padding-bottom: 0.4rem; }
+  .column-a .column-header { color: var(--accent-a); border-color: var(--accent-a); }
+  .column-b .column-header { color: var(--accent-b); border-color: var(--accent-b); }
+  .phase { display: none; }
+  .phase.active { display: block; }
+  .phase h2 { font-size: 1.1rem; font-weight: 400; margin-bottom: 0.4rem; color: var(--accent-a); }
+  .phase p { color: var(--muted); margin-bottom: 1rem; font-size: 0.85rem; line-height: 1.5; }
+  textarea { width: 100%; background: #222; border: 1px solid var(--border); color: var(--fg); padding: 0.75rem; font-family: 'Georgia', serif; font-size: 0.9rem; line-height: 1.6; border-radius: 4px; resize: vertical; min-height: 80px; margin-bottom: 0.75rem; }
+  textarea:focus { outline: none; border-color: var(--accent-a); }
+  .btn-row { display: flex; gap: 0.75rem; justify-content: center; flex-wrap: wrap; margin-top: 1rem; }
+  button { background: transparent; border: 1px solid var(--border); color: var(--fg); padding: 0.5rem 1.2rem; font-family: 'Georgia', serif; font-size: 0.85rem; cursor: pointer; border-radius: 4px; transition: all 0.2s; }
+  button:hover { border-color: var(--accent-a); color: var(--accent-a); }
+  button.primary { background: var(--accent-a); color: var(--bg); border-color: var(--accent-a); }
+  button.primary:hover { opacity: 0.9; }
+  .summary { display: none; }
+  .summary.active { display: block; }
+  .summary h2 { font-size: 1.2rem; font-weight: 400; margin-bottom: 1rem; color: var(--accent-a); }
+  .summary-block { background: #222; border: 1px solid var(--border); border-radius: 4px; padding: 1rem; margin-bottom: 1rem; }
+  .summary-block h3 { font-size: 0.85rem; color: var(--muted); margin-bottom: 0.5rem; text-transform: uppercase; letter-spacing: 0.05em; }
+  .summary-block p { white-space: pre-wrap; font-size: 0.85rem; }
+  .summary-person { font-size: 0.8rem; font-style: italic; margin-bottom: 0.3rem; }
+  @media (max-width: 640px) { .columns { flex-direction: column; } .circles-row { gap: 1.5rem; } .breathing-circle { width: 100px; height: 100px; } }
+</style>
+</head>
+<body>
+<div class="container">
+  <h1>Dyadic Thinking Guide</h1>
+  <p class="subtitle">Two people, one rhythm — breathe together in opposite phase, then each find your own ground, name, direction, and step</p>
+
+  <div id="setup">
+    <p style="color:var(--muted);margin-bottom:1.5rem;">
+      This practice is for two people. You'll breathe together first — one inhales as the other exhales, like two sides of one breath.
+      Then each of you moves through four phases independently, at your own pace, in your own column.
+      There's no need to share what you write unless you want to.
+    </p>
+    <button class="primary start-btn" onclick="start()">Begin</button>
+  </div>
+
+  <div id="practice" style="display:none;">
+    <div class="phase-indicator" id="dots"></div>
+    <div class="breathing-area">
+      <div class="circles-row">
+        <div class="circle-wrapper">
+          <div class="label">Person A</div>
+          <div class="breathing-circle">
+            <div class="circle circle-a inhale" id="circleA"></div>
+          </div>
+        </div>
+        <div class="circle-wrapper">
+          <div class="label">Person B</div>
+          <div class="breathing-circle">
+            <div class="circle circle-b exhale" id="circleB"></div>
+          </div>
+        </div>
+      </div>
+      <div class="breath-label" id="breathLabel">Person A: breathe in... &nbsp;·&nbsp; Person B: breathe out...</div>
+    </div>
+
+    <div id="phase0" class="phase active">
+      <h2>Ground</h2>
+      <p>Breathe together for a few cycles. Let the opposite rhythm settle — as one expands, the other softens. When you're ready, each notice what's present: a mood, a weight, a curiosity. Not what you're thinking <em>about</em> — what you're <em>bringing</em>.</p>
+      <div class="columns">
+        <div class="column column-a">
+          <div class="column-header">Person A</div>
+          <textarea id="p0a" placeholder="What's present for you?" rows="3"></textarea>
+        </div>
+        <div class="column column-b">
+          <div class="column-header">Person B</div>
+          <textarea id="p0b" placeholder="What's present for you?" rows="3"></textarea>
+        </div>
+      </div>
+      <div class="btn-row"><button class="primary" onclick="nextPhase()">Next →</button></div>
+    </div>
+
+    <div id="phase1" class="phase">
+      <h2>Name</h2>
+      <p>What's the thing that wants your attention? Not the problem — the <em>shape</em> of what's here. A knot, a question, an edge, a possibility. Give it a name, even if provisional.</p>
+      <div class="columns">
+        <div class="column column-a">
+          <div class="column-header">Person A</div>
+          <textarea id="p1a" placeholder="The shape of what's here is..." rows="3"></textarea>
+        </div>
+        <div class="column column-b">
+          <div class="column-header">Person B</div>
+          <textarea id="p1b" placeholder="The shape of what's here is..." rows="3"></textarea>
+        </div>
+      </div>
+      <div class="btn-row"><button onclick="prevPhase()">← Back</button><button class="primary" onclick="nextPhase()">Next →</button></div>
+    </div>
+
+    <div id="phase2" class="phase">
+      <h2>Direction</h2>
+      <p>What wants to happen? Not a plan — a direction. A quality of attention, a kind of movement, a question to sit with. Let it be partial. You don't need to know the whole path.</p>
+      <div class="columns">
+        <div class="column column-a">
+          <div class="column-header">Person A</div>
+          <textarea id="p2a" placeholder="What wants to happen..." rows="3"></textarea>
+        </div>
+        <div class="column column-b">
+          <div class="column-header">Person B</div>
+          <textarea id="p2b" placeholder="What wants to happen..." rows="3"></textarea>
+        </div>
+      </div>
+      <div class="btn-row"><button onclick="prevPhase()">← Back</button><button class="primary" onclick="nextPhase()">Next →</button></div>
+    </div>
+
+    <div id="phase3" class="phase">
+      <h2>Step</h2>
+      <p>One thing. Not everything. What's the smallest step that honors the direction? It might be a conversation, a pause, a note, a choice. Something you can do after this practice ends.</p>
+      <div class="columns">
+        <div class="column column-a">
+          <div class="column-header">Person A</div>
+          <textarea id="p3a" placeholder="One step..." rows="3"></textarea>
+        </div>
+        <div class="column column-b">
+          <div class="column-header">Person B</div>
+          <textarea id="p3b" placeholder="One step..." rows="3"></textarea>
+        </div>
+      </div>
+      <div class="btn-row"><button onclick="prevPhase()">← Back</button><button class="primary" onclick="finish()">Finish</button></div>
+    </div>
+  </div>
+
+  <div id="summary" class="summary">
+    <h2>What you found</h2>
+    <div id="summaryContent"></div>
+    <div class="btn-row"><button onclick="reset()">Start again</button></div>
+  </div>
+</div>
+
+<script>
+const phases = ['Ground', 'Name', 'Direction', 'Step'];
+let currentPhase = 0;
+let breathInterval = null;
+let inhalingA = true;
+
+function start() {
+  document.getElementById('setup').style.display = 'none';
+  document.getElementById('practice').style.display = 'block';
+  renderDots();
+  startBreathing();
+}
+
+function renderDots() {
+  const dots = document.getElementById('dots');
+  dots.innerHTML = phases.map((p, i) =>
+    `<div class="phase-dot ${i === currentPhase ? 'active' : ''}" title="${p}"></div>`
+  ).join('');
+}
+
+function startBreathing() {
+  const circleA = document.getElementById('circleA');
+  const circleB = document.getElementById('circleB');
+  const label = document.getElementById('breathLabel');
+  inhalingA = true;
+  updateBreathVisuals(circleA, circleB, label);
+  breathInterval = setInterval(() => {
+    inhalingA = !inhalingA;
+    updateBreathVisuals(circleA, circleB, label);
+  }, 4000);
+}
+
+function updateBreathVisuals(circleA, circleB, label) {
+  circleA.className = `circle circle-a ${inhalingA ? 'inhale' : 'exhale'}`;
+  circleB.className = `circle circle-b ${inhalingA ? 'exhale' : 'inhale'}`;
+  if (inhalingA) {
+    label.textContent = 'Person A: breathe in...  ·  Person B: breathe out...';
+  } else {
+    label.textContent = 'Person A: breathe out...  ·  Person B: breathe in...';
+  }
+}
+
+function nextPhase() {
+  if (currentPhase < 3) {
+    document.getElementById(`phase${currentPhase}`).classList.remove('active');
+    currentPhase++;
+    document.getElementById(`phase${currentPhase}`).classList.add('active');
+    renderDots();
+  }
+}
+
+function prevPhase() {
+  if (currentPhase > 0) {
+    document.getElementById(`phase${currentPhase}`).classList.remove('active');
+    currentPhase--;
+    document.getElementById(`phase${currentPhase}`).classList.add('active');
+    renderDots();
+  }
+}
+
+function finish() {
+  clearInterval(breathInterval);
+  document.getElementById('practice').style.display = 'none';
+  document.getElementById('summary').classList.add('active');
+  const content = document.getElementById('summaryContent');
+  const fields = [];
+  for (let i = 0; i < 4; i++) {
+    const a = document.getElementById(`p${i}a`).value.trim();
+    const b = document.getElementById(`p${i}b`).value.trim();
+    fields.push(`<div class="summary-block"><h3>${phases[i]}</h3><div class="summary-person" style="color:var(--accent-a);">Person A</div><p>${a || '(silent)'}</p><div class="summary-person" style="color:var(--accent-b);margin-top:0.5rem;">Person B</div><p>${b || '(silent)'}</p></div>`);
+  }
+  content.innerHTML = fields.join('');
+}
+
+function reset() {
+  clearInterval(breathInterval);
+  currentPhase = 0;
+  document.querySelectorAll('textarea').forEach(t => t.value = '');
+  document.querySelectorAll('.phase').forEach(p => p.classList.remove('active'));
+  document.getElementById('phase0').classList.add('active');
+  document.getElementById('summary').classList.remove('active');
+  document.getElementById('practice').style.display = 'none';
+  document.getElementById('setup').style.display = 'block';
+}
+</script>
+</body>
+</html>
