@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>shared breathing circle — dwelling companion</title>
+<style>
+  :root {
+    --bg: #1a1a1a;
+    --text: #d4d4d4;
+    --muted: #888;
+    --circle-a: #6b8cff;
+    --circle-b: #ff8c6b;
+    --glow-a: rgba(107, 140, 255, 0.15);
+    --glow-b: rgba(255, 140, 107, 0.15);
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem;
+    line-height: 1.6;
+  }
+  h1 {
+    font-size: 1.25rem;
+    font-weight: 400;
+    color: var(--muted);
+    margin-bottom: 0.5rem;
+    letter-spacing: 0.05em;
+  }
+  .subtitle {
+    color: var(--muted);
+    font-size: 0.9rem;
+    margin-bottom: 3rem;
+    text-align: center;
+    max-width: 400px;
+  }
+  .circles-container {
+    display: flex;
+    gap: 4rem;
+    align-items: center;
+    justify-content: center;
+    flex-wrap: wrap;
+    margin-bottom: 3rem;
+  }
+  .circle-wrapper {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1rem;
+  }
+  .circle {
+    width: 120px;
+    height: 120px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: transform 4s ease-in-out;
+    position: relative;
+  }
+  .circle-a {
+    background: var(--circle-a);
+    box-shadow: 0 0 40px var(--glow-a);
+    animation: breathe-a 8s ease-in-out infinite;
+  }
+  .circle-b {
+    background: var(--circle-b);
+    box-shadow: 0 0 40px var(--glow-b);
+    animation: breathe-b 8s ease-in-out infinite;
+  }
+  @keyframes breathe-a {
+    0%, 100% { transform: scale(1); opacity: 0.6; }
+    50% { transform: scale(1.6); opacity: 1; }
+  }
+  @keyframes breathe-b {
+    0%, 100% { transform: scale(1.6); opacity: 1; }
+    50% { transform: scale(1); opacity: 0.6; }
+  }
+  .circle-label {
+    font-size: 0.8rem;
+    color: var(--muted);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+  }
+  .phase-indicator {
+    display: flex;
+    gap: 1rem;
+    margin-bottom: 2rem;
+    font-size: 0.85rem;
+    color: var(--muted);
+  }
+  .phase {
+    padding: 0.25rem 0.75rem;
+    border-radius: 4px;
+    transition: all 0.5s ease;
+  }
+  .phase.active {
+    color: var(--text);
+    background: rgba(255,255,255,0.05);
+  }
+  .instructions {
+    text-align: center;
+    max-width: 400px;
+    color: var(--muted);
+    font-size: 0.9rem;
+    margin-bottom: 2rem;
+    min-height: 3em;
+  }
+  .controls {
+    display: flex;
+    gap: 1rem;
+    margin-bottom: 3rem;
+  }
+  button {
+    background: rgba(255,255,255,0.05);
+    color: var(--text);
+    border: 1px solid rgba(255,255,255,0.1);
+    padding: 0.5rem 1.5rem;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 0.85rem;
+    transition: all 0.3s ease;
+  }
+  button:hover {
+    background: rgba(255,255,255,0.1);
+    border-color: rgba(255,255,255,0.2);
+  }
+  button:active {
+    transform: scale(0.97);
+  }
+  .speed-control {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    color: var(--muted);
+    font-size: 0.8rem;
+  }
+  .speed-control input[type="range"] {
+    width: 80px;
+    accent-color: var(--muted);
+  }
+  .footer {
+    margin-top: 2rem;
+    color: var(--muted);
+    font-size: 0.75rem;
+    text-align: center;
+    max-width: 400px;
+    line-height: 1.5;
+  }
+  .footer a {
+    color: var(--muted);
+    text-decoration: underline;
+    text-decoration-style: dotted;
+  }
+  @media (max-width: 600px) {
+    .circles-container { gap: 2rem; }
+    .circle { width: 100px; height: 100px; }
+  }
+</style>
+</head>
+<body>
+
+<h1>shared breathing circle</h1>
+<p class="subtitle">two circles, one rhythm — breathe together without speaking</p>
+
+<div class="phase-indicator">
+  <span class="phase active" id="phase-inhale">inhale</span>
+  <span class="phase" id="phase-exhale">exhale</span>
+  <span class="phase" id="phase-pause">pause</span>
+</div>
+
+<div class="circles-container">
+  <div class="circle-wrapper">
+    <div class="circle circle-a" id="circle-a"></div>
+    <span class="circle-label">you</span>
+  </div>
+  <div class="circle-wrapper">
+    <div class="circle circle-b" id="circle-b"></div>
+    <span class="circle-label">they</span>
+  </div>
+</div>
+
+<div class="instructions" id="instructions">
+  sit facing each other. let your breath find the circle's rhythm.
+</div>
+
+<div class="controls">
+  <button id="btn-start">start</button>
+  <button id="btn-pause" style="display:none">pause</button>
+  <button id="btn-reset">reset</button>
+</div>
+
+<div class="speed-control">
+  <span>slower</span>
+  <input type="range" id="speed-slider" min="4" max="12" value="8" step="1">
+  <span>faster</span>
+</div>
+
+<div class="footer">
+  <p>breathe together — the circles expand and contract in opposite rhythm.<br>
+  as one grows, the other recedes — like two people sharing one breath.<br>
+  <a href="index.html">← back to dwelling companion</a></p>
+</div>
+
+<script>
+  const circleA = document.getElementById('circle-a');
+  const circleB = document.getElementById('circle-b');
+  const instructions = document.getElementById('instructions');
+  const btnStart = document.getElementById('btn-start');
+  const btnPause = document.getElementById('btn-pause');
+  const btnReset = document.getElementById('btn-reset');
+  const speedSlider = document.getElementById('speed-slider');
+  const phaseInhale = document.getElementById('phase-inhale');
+  const phaseExhale = document.getElementById('phase-exhale');
+  const phasePause = document.getElementById('phase-pause');
+
+  let isRunning = false;
+  let isPaused = false;
+  let currentPhase = 'inhale';
+  let currentSpeed = 8; // seconds per full cycle
+
+  const instructions_text = {
+    inhale: 'breathe in — the circles expand together',
+    exhale: 'breathe out — the circles recede together',
+    pause: 'hold — rest in the space between',
+    start: 'sit facing each other. let your breath find the circle\'s rhythm.'
+  };
+
+  function updateSpeed(val) {
+    currentSpeed = parseInt(val);
+    const duration = currentSpeed / 2; // half cycle per animation
+    circleA.style.animationDuration = duration + 's';
+    circleB.style.animationDuration = duration + 's';
+  }
+
+  function setPhase(phase) {
+    currentPhase = phase;
+    document.querySelectorAll('.phase').forEach(p => p.classList.remove('active'));
+    if (phase === 'inhale') phaseInhale.classList.add('active');
+    else if (phase === 'exhale') phaseExhale.classList.add('active');
+    else if (phase === 'pause') phasePause.classList.add('active');
+    instructions.textContent = instructions_text[phase] || instructions_text.start;
+  }
+
+  // Track animation phase via animationiteration event
+  circleA.addEventListener('animationiteration', () => {
+    if (!isRunning || isPaused) return;
+    // Each iteration is one half-cycle (inhale or exhale)
+    // The circles are always opposite, so we track the relationship
+    if (currentPhase === 'inhale' || currentPhase === 'pause') {
+      setPhase('exhale');
+    } else {
+      setPhase('inhale');
+    }
+  });
+
+  // Also track via animationstart for initial state
+  circleA.addEventListener('animationstart', () => {
+    if (isRunning && !isPaused) setPhase('inhale');
+  });
+
+  function startBreathing() {
+    isRunning = true;
+    isPaused = false;
+    circleA.style.animationPlayState = 'running';
+    circleB.style.animationPlayState = 'running';
+    btnStart.style.display = 'none';
+    btnPause.style.display = 'inline-block';
+    btnPause.textContent = 'pause';
+    setPhase('inhale');
+  }
+
+  function pauseBreathing() {
+    isPaused = !isPaused;
+    circleA.style.animationPlayState = isPaused ? 'paused' : 'running';
+    circleB.style.animationPlayState = isPaused ? 'paused' : 'running';
+    btnPause.textContent = isPaused ? 'resume' : 'pause';
+    instructions.textContent = isPaused ? 'paused — return when you\'re ready' : instructions_text[currentPhase];
+  }
+
+  function resetBreathing() {
+    isRunning = false;
+    isPaused = false;
+    circleA.style.animationPlayState = 'paused';
+    circleB.style.animationPlayState = 'paused';
+    circleA.style.animation = 'none';
+    circleB.style.animation = 'none';
+    // Force reflow
+    void circleA.offsetWidth;
+    void circleB.offsetWidth;
+    // Reapply animations
+    const dur = currentSpeed / 2;
+    circleA.style.animation = `breathe-a ${dur}s ease-in-out infinite`;
+    circleB.style.animation = `breathe-b ${dur}s ease-in-out infinite`;
+    circleA.style.animationPlayState = 'paused';
+    circleB.style.animationPlayState = 'paused';
+    btnStart.style.display = 'inline-block';
+    btnPause.style.display = 'none';
+    setPhase('start');
+  }
+
+  btnStart.addEventListener('click', startBreathing);
+  btnPause.addEventListener('click', pauseBreathing);
+  btnReset.addEventListener('click', resetBreathing);
+
+  speedSlider.addEventListener('input', (e) => {
+    updateSpeed(e.target.value);
+    if (isRunning && !isPaused) {
+      // Reapply animations at new speed
+      const wasRunning = isRunning;
+      const wasPaused = isPaused;
+      resetBreathing();
+      if (wasRunning && !wasPaused) {
+        setTimeout(startBreathing, 100);
+      }
+    }
+  });
+
+  // Initialize paused
+  circleA.style.animationPlayState = 'paused';
+  circleB.style.animationPlayState = 'paused';
+  setPhase('start');
+</script>
+</body>
+</html>
