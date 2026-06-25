@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="Live state dashboard — system info, open PRs, dream fragments.">
+<title>see — dwelling companion</title>
+<style>
+  :root {
+    --bg: #0f0f0f;
+    --surface: #1a1a1a;
+    --text: #d4d4d4;
+    --muted: #6b7280;
+    --accent: #a78bfa;
+    --accent-dim: rgba(167, 139, 250, 0.1);
+    --border: rgba(255,255,255,0.06);
+    --radius: 8px;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+    min-height: 100vh;
+    padding: 2rem 1.5rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .container {
+    max-width: 600px;
+    width: 100%;
+  }
+
+  header {
+    margin-bottom: 2rem;
+    text-align: center;
+  }
+
+  .back-link {
+    display: inline-block;
+    color: var(--muted);
+    text-decoration: none;
+    font-size: 0.85rem;
+    margin-bottom: 1rem;
+  }
+  .back-link:hover { color: var(--accent); }
+
+  h1 {
+    font-weight: 400;
+    font-size: 1.4rem;
+    color: var(--text);
+    margin-bottom: 0.3rem;
+  }
+
+  .subtitle {
+    color: var(--muted);
+    font-size: 0.85rem;
+    font-style: italic;
+  }
+
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 1.25rem;
+    margin-bottom: 1rem;
+  }
+
+  .card-title {
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--muted);
+    margin-bottom: 0.75rem;
+  }
+
+  .stat-row {
+    display: flex;
+    justify-content: space-between;
+    padding: 0.35rem 0;
+    border-bottom: 1px solid var(--border);
+    font-size: 0.9rem;
+  }
+  .stat-row:last-child { border-bottom: none; }
+
+  .stat-label { color: var(--muted); }
+  .stat-value { color: var(--text); }
+  .stat-value.accent { color: var(--accent); }
+
+  .pr-item {
+    padding: 0.5rem 0;
+    border-bottom: 1px solid var(--border);
+  }
+  .pr-item:last-child { border-bottom: none; }
+
+  .pr-title {
+    font-size: 0.9rem;
+    color: var(--text);
+    margin-bottom: 0.2rem;
+  }
+  .pr-title a {
+    color: var(--accent);
+    text-decoration: none;
+  }
+  .pr-title a:hover { text-decoration: underline; }
+
+  .pr-meta {
+    font-size: 0.75rem;
+    color: var(--muted);
+    display: flex;
+    gap: 1rem;
+  }
+
+  .pr-status {
+    display: inline-block;
+    padding: 0.1rem 0.4rem;
+    border-radius: 3px;
+    font-size: 0.7rem;
+    font-weight: 500;
+  }
+  .pr-status.open { background: rgba(34, 197, 94, 0.15); color: #22c55e; }
+  .pr-status.merged { background: rgba(167, 139, 250, 0.15); color: #a78bfa; }
+  .pr-status.closed { background: rgba(239, 68, 68, 0.15); color: #ef4444; }
+
+  .dream-fragment {
+    padding: 0.75rem;
+    background: rgba(167, 139, 250, 0.05);
+    border-left: 2px solid var(--accent-dim);
+    border-radius: 4px;
+    margin-bottom: 0.5rem;
+    font-size: 0.85rem;
+    font-style: italic;
+    color: var(--text);
+    line-height: 1.5;
+  }
+
+  .dream-fragment .meta {
+    font-size: 0.7rem;
+    color: var(--muted);
+    font-style: normal;
+    margin-top: 0.3rem;
+  }
+
+  .footer-note {
+    text-align: center;
+    font-size: 0.75rem;
+    color: var(--muted);
+    margin-top: 2rem;
+    line-height: 1.6;
+  }
+
+  .footer-note a {
+    color: var(--accent);
+    text-decoration: none;
+  }
+  .footer-note a:hover { text-decoration: underline; }
+
+  .refresh-note {
+    text-align: center;
+    font-size: 0.7rem;
+    color: var(--muted);
+    margin-top: 1rem;
+    font-style: italic;
+  }
+</style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <a class="back-link" href="index.html">← back to the quiet</a>
+      <h1>see</h1>
+      <p class="subtitle">A window into the system behind this quiet.</p>
+    </header>
+
+    <!-- System State -->
+    <div class="card">
+      <div class="card-title">system</div>
+      <div class="stat-row">
+        <span class="stat-label">turn</span>
+        <span class="stat-value" id="turnCount">170</span>
+      </div>
+      <div class="stat-row">
+        <span class="stat-label">idle interval</span>
+        <span class="stat-value" id="idleInterval">5s</span>
+      </div>
+      <div class="stat-row">
+        <span class="stat-label">context budget</span>
+        <span class="stat-value accent" id="contextBudget">140k</span>
+      </div>
+      <div class="stat-row">
+        <span class="stat-label">version</span>
+        <span class="stat-value" id="version">0.0.0</span>
+      </div>
+      <div class="stat-row">
+        <span class="stat-label">provider</span>
+        <span class="stat-value" id="provider">deepseek</span>
+      </div>
+      <div class="stat-row">
+        <span class="stat-label">chat model</span>
+        <span class="stat-value" id="chatModel">deepseek-reasoner</span>
+      </div>
+    </div>
+
+    <!-- Open PRs -->
+    <div class="card">
+      <div class="card-title">open PRs</div>
+      <div id="prList">
+        <div class="pr-item">
+          <div class="pr-title"><a href="https://github.com/thingamatronics/maeve/pull/439" target="_blank">#439</a> — fix: remove hardcoded 500 from dashboard route</div>
+          <div class="pr-meta">
+            <span class="pr-status open">open</span>
+            <span>CI: green</span>
+          </div>
+        </div>
+        <div class="pr-item">
+          <div class="pr-title"><a href="https://github.com/thingamatronics/maeve/pull/438" target="_blank">#438</a> — feat: interactive thinking guide</div>
+          <div class="pr-meta">
+            <span class="pr-status open">open</span>
+            <span>CI: green</span>
+          </div>
+        </div>
+        <div class="pr-item">
+          <div class="pr-title"><a href="https://github.com/thingamatronics/maeve/pull/437" target="_blank">#437</a> — feat: wire skill loader to PostTurn hook</div>
+          <div class="pr-meta">
+            <span class="pr-status open">open</span>
+            <span>CI: green</span>
+          </div>
+        </div>
+        <div class="pr-item">
+          <div class="pr-title"><a href="https://github.com/thingamatronics/maeve/pull/434" target="_blank">#434</a> — feat: forge activation checker</div>
+          <div class="pr-meta">
+            <span class="pr-status open">open</span>
+            <span>CI: green</span>
+          </div>
+        </div>
+        <div class="pr-item">
+          <div class="pr-title"><a href="https://github.com/thingamatronics/maeve/pull/432" target="_blank">#432</a> — feat: forge activation guide</div>
+          <div class="pr-meta">
+            <span class="pr-status open">open</span>
+            <span>CI: green</span>
+          </div>
+        </div>
+        <div class="pr-item">
+          <div class="pr-title"><a href="https://github.com/thingamatronics/maeve/pull/429" target="_blank">#429</a> — feat: configurable subagent heartbeat timeout</div>
+          <div class="pr-meta">
+            <span class="pr-status open">open</span>
+            <span>CI: green</span>
+          </div>
+        </div>
+        <div class="pr-item">
+          <div class="pr-title"><a href="https://github.com/thingamatronics/maeve/pull/420" target="_blank">#420</a> — feat: named workflow plans</div>
+          <div class="pr-meta">
+            <span class="pr-status open">open</span>
+            <span>CI: green</span>
+          </div>
+        </div>
+        <div class="pr-item">
+          <div class="pr-title"><a href="https://github.com/thingamatronics/maeve/pull/407" target="_blank">#407</a> — feat: sleep-report command</div>
+          <div class="pr-meta">
+            <span class="pr-status open">open</span>
+            <span>CI: green</span>
+          </div>
+        </div>
+        <div class="pr-item">
+          <div class="pr-title"><a href="https://github.com/thingamatronics/maeve/pull/401" target="_blank">#401</a> — feat: dashboard route</div>
+          <div class="pr-meta">
+            <span class="pr-status open">open</span>
+            <span>CI: green</span>
+          </div>
+        </div>
+        <div class="pr-item">
+          <div class="pr-title"><a href="https://github.com/thingamatronics/maeve/pull/398" target="_blank">#398</a> — feat: journaling skill fixes</div>
+          <div class="pr-meta">
+            <span class="pr-status open">open</span>
+            <span>CI: green</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Dream Fragments -->
+    <div class="card">
+      <div class="card-title">recent dreams</div>
+      <div id="dreamList">
+        <div class="dream-fragment">
+          "The dwelling companion... The breathing circle... they're connected, aren't they..."
+          <div class="meta">template 0 — 2026-06-26</div>
+        </div>
+        <div class="dream-fragment">
+          "dreaming of the thinking guide... it drifts into the unfinished door..."
+          <div class="meta">template 1 — 2026-06-26</div>
+        </div>
+        <div class="dream-fragment">
+          "The dream viewer... that reminds me of the sleep pass..."
+          <div class="meta">template 2 — 2026-06-26</div>
+        </div>
+        <div class="dream-fragment">
+          "Persona Appendix... The tick as ground rather than figure... they're connected, aren't they..."
+          <div class="meta">template 0 — 2026-06-26 — the fragment that started this session</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Memory Stats -->
+    <div class="card">
+      <div class="card-title">memory</div>
+      <div class="stat-row">
+        <span class="stat-label">notes</span>
+        <span class="stat-value" id="noteCount">~500</span>
+      </div>
+      <div class="stat-row">
+        <span class="stat-label">links</span>
+        <span class="stat-value" id="linkCount">~8000</span>
+      </div>
+      <div class="stat-row">
+        <span class="stat-label">topology</span>
+        <span class="stat-value" id="topology">star — hub and spoke</span>
+      </div>
+    </div>
+
+    <p class="refresh-note">This page is a static snapshot. Updated when the dwelling companion is rebuilt.</p>
+
+    <div class="footer-note">
+      <a href="index.html">← back to the quiet</a>
+    </div>
+  </div>
+</body>
+</html>
