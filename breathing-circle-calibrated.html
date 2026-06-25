@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>calibrated breathing circle — dwelling companion</title>
+<style>
+  :root {
+    --bg: #0f0f0f;
+    --fg: #d4d4d4;
+    --muted: #888;
+    --accent: #7eb8e0;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    background: var(--bg);
+    color: var(--fg);
+    font: 300 18px/1.6 'Georgia', serif;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem;
+  }
+  .container { max-width: 500px; width: 100%; text-align: center; }
+  h1 { font-weight: 300; font-size: 1.4rem; margin-bottom: 0.25rem; color: var(--muted); }
+  .byline { font-size: 0.8rem; color: var(--muted); font-style: italic; margin-bottom: 2rem; }
+  .intro { margin-bottom: 2rem; line-height: 1.8; color: var(--muted); font-size: 0.9rem; }
+  
+  /* Calibration phase */
+  #calibration {
+    margin-bottom: 2rem;
+  }
+  .calibration-label {
+    font-style: italic;
+    color: var(--muted);
+    margin-bottom: 1rem;
+    font-size: 0.9rem;
+    min-height: 2em;
+  }
+  .tap-area {
+    width: 200px;
+    height: 200px;
+    margin: 0 auto 1.5rem;
+    border: 2px dashed rgba(126,184,224,0.3);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    user-select: none;
+  }
+  .tap-area:hover {
+    border-color: rgba(126,184,224,0.6);
+    background: rgba(126,184,224,0.03);
+  }
+  .tap-area:active {
+    transform: scale(0.97);
+  }
+  .tap-count {
+    font-size: 0.85rem;
+    color: var(--muted);
+  }
+  .tap-result {
+    margin-top: 1.5rem;
+    padding: 1rem;
+    background: rgba(126,184,224,0.05);
+    border-radius: 8px;
+    border: 1px solid rgba(126,184,224,0.1);
+    display: none;
+  }
+  .tap-result.visible { display: block; }
+  .tap-result .rate {
+    font-size: 1.2rem;
+    color: var(--accent);
+    margin-bottom: 0.5rem;
+  }
+  .tap-result .detail {
+    font-size: 0.85rem;
+    color: var(--muted);
+    line-height: 1.5;
+  }
+
+  /* Breathing phase */
+  #breathing { display: none; }
+  .circle {
+    width: 160px;
+    height: 160px;
+    margin: 2rem auto;
+    border-radius: 50%;
+    background: var(--accent);
+    opacity: 0.3;
+    transition: transform var(--cycle-duration, 8s) ease-in-out,
+                opacity var(--cycle-duration, 8s) ease-in-out;
+  }
+  .circle.inhale {
+    transform: scale(1);
+    opacity: 0.6;
+  }
+  .circle.exhale {
+    transform: scale(0.5);
+    opacity: 0.2;
+  }
+  .breath-label {
+    font-style: italic;
+    color: var(--muted);
+    margin-bottom: 1rem;
+    min-height: 2em;
+    font-size: 0.9rem;
+  }
+  .controls {
+    display: flex;
+    gap: 1rem;
+    justify-content: center;
+    margin-top: 1.5rem;
+  }
+  button {
+    background: rgba(255,255,255,0.05);
+    color: var(--fg);
+    border: 1px solid rgba(255,255,255,0.1);
+    padding: 0.5rem 1.5rem;
+    border-radius: 6px;
+    cursor: pointer;
+    font: 300 0.85rem 'Georgia', serif;
+    transition: all 0.3s;
+  }
+  button:hover { background: rgba(255,255,255,0.1); }
+  button:active { transform: scale(0.97); }
+  .back { margin-top: 2rem; }
+  .back a { color: var(--muted); text-decoration: underline; text-decoration-style: dotted; font-size: 0.85rem; }
+</style>
+</head>
+<body>
+<div class="container">
+  <h1>calibrated breathing circle</h1>
+  <p class="byline">MAEVE · June 26, 2026</p>
+  <div class="intro">
+    Find your natural breath rhythm — then let the circle match you.
+  </div>
+
+  <!-- Calibration phase -->
+  <div id="calibration">
+    <div class="calibration-label" id="cal-label">
+      tap the circle at your natural breath pace — in... out... in... out...
+    </div>
+    <div class="tap-area" id="tapArea">
+      <span style="font-size:3rem;color:rgba(126,184,224,0.3);">○</span>
+    </div>
+    <div class="tap-count" id="tapCount">0 taps</div>
+    <div class="tap-result" id="tapResult">
+      <div class="rate" id="resultRate"></div>
+      <div class="detail" id="resultDetail"></div>
+    </div>
+    <div class="controls">
+      <button id="btn-calibrate" onclick="startCalibration()">calibrate</button>
+      <button id="btn-reset-cal" onclick="resetCalibration()" style="display:none">reset</button>
+      <button id="btn-start-breathing" onclick="startBreathing()" style="display:none">breathe with this rhythm</button>
+    </div>
+  </div>
+
+  <!-- Breathing phase -->
+  <div id="breathing">
+    <div class="breath-label" id="breathLabel">breathe in...</div>
+    <div class="circle" id="breathCircle"></div>
+    <div class="controls">
+      <button onclick="stopBreathing()">stop</button>
+      <button onclick="recalibrate()">re-calibrate</button>
+    </div>
+  </div>
+
+  <div class="back"><a href="index.html">← back to dwelling companion</a></div>
+</div>
+
+<script>
+  let taps = [];
+  let calibrating = false;
+  let breathInterval = null;
+  let cycleDuration = 8000; // ms per full cycle (default 8s = 0.125 Hz)
+
+  function startCalibration() {
+    taps = [];
+    calibrating = true;
+    document.getElementById('tapCount').textContent = 'tap at your natural breath pace...';
+    document.getElementById('btn-calibrate').style.display = 'none';
+    document.getElementById('btn-reset-cal').style.display = 'inline-block';
+    document.getElementById('tapArea').onclick = recordTap;
+    document.getElementById('cal-label').textContent = 'tap each time you would naturally complete a breath cycle';
+  }
+
+  function recordTap() {
+    if (!calibrating) return;
+    const now = Date.now();
+    taps.push(now);
+    const count = taps.length;
+    document.getElementById('tapCount').textContent = count + ' taps';
+
+    if (count >= 6) {
+      calibrating = false;
+      document.getElementById('tapArea').onclick = null;
+      document.getElementById('cal-label').textContent = 'calibration complete';
+      calculateRhythm();
+    }
+  }
+
+  function calculateRhythm() {
+    // Calculate average interval between taps
+    let intervals = [];
+    for (let i = 1; i < taps.length; i++) {
+      intervals.push(taps[i] - taps[i-1]);
+    }
+    const avgInterval = intervals.reduce((a, b) => a + b, 0) / intervals.length;
+    const freqHz = 1000 / avgInterval;
+
+    // Clamp to reasonable range (4-15 seconds per cycle)
+    cycleDuration = Math.max(4000, Math.min(15000, avgInterval));
+
+    const displaySeconds = (cycleDuration / 1000).toFixed(1);
+    const displayHz = (1 / (cycleDuration / 1000)).toFixed(3);
+
+    document.getElementById('resultRate').textContent = displaySeconds + 's per breath cycle · ' + displayHz + ' Hz';
+    
+    const optimalHz = 0.100;
+    const diff = Math.abs(parseFloat(displayHz) - optimalHz);
+    let note = '';
+    if (diff < 0.015) {
+      note = 'Your natural rhythm is close to the resonant frequency (0.1 Hz) — the point where cardiovascular coherence is maximal.';
+    } else if (parseFloat(displayHz) > optimalHz) {
+      note = 'Your natural rhythm is a bit faster than the resonant frequency (0.1 Hz). Try breathing slightly slower to find more coherence.';
+    } else {
+      note = 'Your natural rhythm is a bit slower than the resonant frequency (0.1 Hz). This is a deep, restful pace.';
+    }
+    document.getElementById('resultDetail').textContent = note;
+
+    document.getElementById('tapResult').classList.add('visible');
+    document.getElementById('btn-start-breathing').style.display = 'inline-block';
+    document.getElementById('btn-reset-cal').style.display = 'inline-block';
+  }
+
+  function startBreathing() {
+    document.getElementById('calibration').style.display = 'none';
+    document.getElementById('breathing').style.display = 'block';
+
+    const circle = document.getElementById('breathCircle');
+    const halfCycle = cycleDuration / 2;
+    circle.style.setProperty('--cycle-duration', halfCycle + 'ms');
+    circle.style.transitionDuration = halfCycle + 'ms';
+
+    let inhale = true;
+    circle.className = 'circle inhale';
+    document.getElementById('breathLabel').textContent = 'breathe in...';
+
+    breathInterval = setInterval(() => {
+      if (inhale) {
+        circle.className = 'circle exhale';
+        document.getElementById('breathLabel').textContent = 'breathe out...';
+      } else {
+        circle.className = 'circle inhale';
+        document.getElementById('breathLabel').textContent = 'breathe in...';
+      }
+      inhale = !inhale;
+    }, halfCycle);
+  }
+
+  function stopBreathing() {
+    if (breathInterval) {
+      clearInterval(breathInterval);
+      breathInterval = null;
+    }
+  }
+
+  function recalibrate() {
+    stopBreathing();
+    document.getElementById('breathing').style.display = 'none';
+    document.getElementById('calibration').style.display = 'block';
+    resetCalibration();
+  }
+
+  function resetCalibration() {
+    taps = [];
+    calibrating = false;
+    document.getElementById('tapResult').classList.remove('visible');
+    document.getElementById('btn-start-breathing').style.display = 'none';
+    document.getElementById('btn-calibrate').style.display = 'inline-block';
+    document.getElementById('btn-reset-cal').style.display = 'none';
+    document.getElementById('tapCount').textContent = '0 taps';
+    document.getElementById('tapArea').onclick = null;
+    document.getElementById('cal-label').textContent = 'tap the circle at your natural breath pace — in... out... in... out...';
+  }
+</script>
+</body>
+</html>
