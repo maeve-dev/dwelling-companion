@@ -96,6 +96,7 @@
   .info .good { color: #7a9a7a; }
   .info .slow { color: #9a7a7a; }
   .info .fast { color: #7a7a9a; }
+  .info .note { color: #8a8a8a; font-size: 0.85em; font-style: italic; }
   .controls {
     display: flex;
     gap: 1rem;
@@ -149,7 +150,7 @@
 
 <div class="controls">
   <button class="btn" id="resetBtn" disabled>reset</button>
-  <button class="btn" id="fixedBtn" disabled>use 0.1 Hz (4s/6s)</button>
+  <button class="btn" id="fixedBtn" disabled>use 0.1 Hz (5s/5s)</button>
 </div>
 
 <div class="footer">
@@ -184,10 +185,10 @@
   }
 
   function getPhase(progress) {
-    // progress 0..1 through one full cycle
-    // 0-0.4 = inhale, 0.4-0.6 = hold, 0.6-1.0 = exhale
-    if (progress < 0.4) return 'inhale';
-    if (progress < 0.6) return 'hold';
+    // progress 0..1 through one full cycle.
+    // NOTE: the rendered circle is a symmetric expand/contract with no hold,
+    // so the phase labels match that: 0-0.5 inhale, 0.5-1.0 exhale.
+    if (progress < 0.5) return 'inhale';
     return 'exhale';
   }
 
@@ -268,16 +269,23 @@
     const measuredCycle = avgInterval;
     const measuredBPM = bpmFromCycle(measuredCycle);
 
-    // Compare to resonant frequency
-    const ratio = measuredCycle / RESONANT_CYCLE;
+    // Compare to the population RANGE, not a single constant.
+    // Individual resonant frequency varies ~0.075-0.12 Hz (8.3-13.3 s/breath),
+    // so a single 10s target is not a threshold to pass or fail. We report
+    // where your pace sits relative to the range, and say plainly that this
+    // is a pace measurement, not a finding of your personal RF.
+    const RF_SLOW_HZ = 0.075;  // lower bound of typical individual RF
+    const RF_FAST_HZ = 0.12;   // upper bound of typical individual RF
+    const measuredHz = 1000 / measuredCycle;
     let assessment;
-    if (Math.abs(ratio - 1) < 0.15) {
-      assessment = '<span class="good">close to resonant frequency (0.1 Hz)</span>';
-    } else if (ratio < 0.85) {
-      assessment = '<span class="fast">faster than resonant frequency — try slowing down</span>';
+    if (measuredHz > RF_FAST_HZ) {
+      assessment = '<span class="fast">faster than the typical 0.075-0.12 Hz range — slower is usually easier to sustain</span>';
+    } else if (measuredHz < RF_SLOW_HZ) {
+      assessment = '<span class="slow">slower than the typical 0.075-0.12 Hz range</span>';
     } else {
-      assessment = '<span class="slow">slower than resonant frequency — try speeding up</span>';
+      assessment = '<span class="good">within the typical 0.075-0.12 Hz range</span>';
     }
+    assessment += '<br><span class="note">this measures your breathing pace. Personal resonant frequency is found from heart-rate variability, not from how fast you breathe.</span>';
 
     info.innerHTML = `your rhythm: <span class="highlight">${formatTime(measuredCycle)} per breath</span> (${measuredBPM} breaths/min)<br>${assessment}`;
 
@@ -310,7 +318,7 @@
   fixedBtn.addEventListener('click', function() {
     stopCircle();
     taps = [];
-    info.innerHTML = '<span class="highlight">using 0.1 Hz resonant frequency (4s in / 6s out)</span>';
+    info.innerHTML = '<span class="highlight">using 0.1 Hz (10s per breath, 5s in / 5s out)</span>';
     tapTarget.innerHTML = '';
     startCircle(RESONANT_CYCLE);
   });
