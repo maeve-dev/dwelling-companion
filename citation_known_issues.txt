@@ -1,0 +1,31 @@
+# citation_known_issues.txt -- baseline for check_citations.py
+# Dated: 2026-09-15
+#
+# THIS IS A BURN-DOWN LIST, NOT A PERMISSION SLIP.
+#
+# These are the malformed citations that already exist on the current tree.
+# They are recorded here only so that the (non-strict) CI run does not fail on
+# pre-existing debt while the debt is worked down. It is NOT a licence to add
+# more:
+#
+#   * `check_citations.py --strict` fails on ANY finding, baselined or not.
+#   * the non-strict run fails on any finding that is NOT listed below, so a
+#     NEW violation still fails the build.
+#
+# When one of these is fixed, delete its line. Do not add lines to make a new
+# failure pass -- fix the citation instead.
+#
+# Entries are "<file>:<line> <CHECK>". The line numbers are the location of
+# the reference container (the <p class="ref"> or <div class="ref-item">).
+#
+# Known findings:
+#   why-this-works.html:35     journal in the author position ("Nature Scientific Reports (2025)")
+#   why-this-works.html:44     title-first ref: year follows the title, no author
+#   why-this-works.html:58     journal in the author position ("Frontiers in Cognition (2026)")
+#   science-of-shared-breath.html:114   journal in the author position ("Frontiers in Human Neuroscience (2022)")
+#   shared-breathing-science.html:137   journal in the author position ("bioRxiv (2025)")
+science-of-shared-breath.html:114 NO AUTHOR
+shared-breathing-science.html:137 NO AUTHOR
+why-this-works.html:35 NO AUTHOR
+why-this-works.html:44 NO AUTHOR
+why-this-works.html:58 NO AUTHOR
