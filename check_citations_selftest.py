@@ -13,7 +13,10 @@ ALL of the following to hold:
   (iv)  a clean reference whose venue is plain prose (no ``<em>``) is still
         entered into the key-consistency comparison;
   (v)   two genuinely different works by the same first author and year, with
-        different titles, do NOT produce a venue/locator disagreement.
+        different titles, do NOT produce a venue/locator disagreement;
+  (vi)  a footnote container (``<p id="fnN">``) is both COUNTED and
+        ANALYSED: the leading footnote number is stripped, and a journal
+        sitting in its author position is flagged NO AUTHOR.
 
 Stdlib only.  Exits 0 iff every case behaves; prints which case failed.
 """
@@ -77,6 +80,12 @@ TWO_DIFFERENT_WORKS = """<!doctype html><html><body>
 </body></html>
 """
 
+FOOTNOTE_BLOCK = """<!doctype html><html><body>
+<p id="fn1"><sup>1</sup> Gamma, A., &amp; Metzinger, T. (2021). The Minimal Phenomenal Experience questionnaire. <em>PLOS One</em>, 16(7), e0253694.</p>
+<p id="fn2"><sup>2</sup> Frontiers in Human Neuroscience (2022). Inter-brain EEG during shared attention.</p>
+</body></html>
+"""
+
 
 # --- cases ----------------------------------------------------------------
 
@@ -120,12 +129,26 @@ def case_different_works():
     return None
 
 
+
+def case_footnote_container():
+    rc, out = run_checker({"fn.html": FOOTNOTE_BLOCK})
+    if "footnote=2" not in out:
+        return (f"expected the two <p id=\"fnN\"> footnotes to be collected "
+                f"as footnote refs, got:\n{out}")
+    if "NO AUTHOR" not in out:
+        return (f"a journal-in-author-position inside a footnote was not "
+                f"flagged NO AUTHOR -- the container is counted but its "
+                f"content is not analysed:\n{out}")
+    return None
+
+
 CASES = [
     ("(i) div.ref/ref-item block is counted", case_div_block),
     ("(ii) venue-as-author flagged NO AUTHOR", case_venue_as_author),
     ("(iii) title-first ref flagged NO AUTHOR", case_title_first),
     ("(iv) plain-prose venue still key-checked", case_plain_venue_entered),
     ("(v) distinct works do not disagree", case_different_works),
+    ("(vi) footnote container counted and analysed", case_footnote_container),
 ]
 
 

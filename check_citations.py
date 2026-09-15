@@ -129,6 +129,9 @@ def is_heading(content):
     return False
 
 
+FOOTNOTE_ID = re.compile(r'\bid="fn[0-9]+"', re.I)
+
+
 def collect(root):
     """Return ``(refs, source_counts, headings_skipped, pages)`` for *root*.
 
@@ -146,8 +149,11 @@ def collect(root):
 
         items = []       # (start, content)
         containers = []  # (start, end, content)
+        footnotes = []   # (start, content)
         for tag, attrs, content, start, cstart in iter_elements(text):
             cls = classes_of(attrs)
+            if FOOTNOTE_ID.search(attrs):
+                footnotes.append((start, content))
             if "ref-item" in cls:
                 items.append((start, content))
             elif "ref" in cls:
@@ -157,6 +163,8 @@ def collect(root):
         item_starts = [s for s, _ in items]
         for start, content in items:
             emitted.append((start, content, "ref-item"))
+        for start, content in footnotes:
+            emitted.append((start, content, "footnote"))
         for start, end, content in containers:
             # Skip a container whose children are the real references; those
             # children are emitted on their own, so this avoids double-counting.
@@ -170,6 +178,8 @@ def collect(root):
                 headings_skipped += 1
                 continue
             raw = clean(content)
+            if kind == "footnote":
+                raw = re.sub(r"^[0-9]+\s*", "", raw)
             if not raw:
                 headings_skipped += 1
                 continue
