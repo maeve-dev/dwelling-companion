@@ -25,5 +25,3 @@
 # and deleted from the list below (why-this-works.html:35, :44, :58), so the file
 # advertised five known findings over a two-line baseline. To burn an entry down,
 # delete its line below; there is no comment to keep in step.
-science-of-shared-breath.html:114 NO AUTHOR
-shared-breathing-science.html:137 NO AUTHOR
