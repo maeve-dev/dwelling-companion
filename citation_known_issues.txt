@@ -18,11 +18,12 @@
 # Entries are "<file>:<line> <CHECK>". The line numbers are the location of
 # the reference container (the <p class="ref"> or <div class="ref-item">).
 #
-# Known findings:
-#   why-this-works.html:35     journal in the author position ("Nature Scientific Reports (2025)")
-#   why-this-works.html:44     title-first ref: year follows the title, no author
-#   why-this-works.html:58     journal in the author position ("Frontiers in Cognition (2026)")
-#   science-of-shared-breath.html:114   journal in the author position ("Frontiers in Human Neuroscience (2022)")
-#   shared-breathing-science.html:137   journal in the author position ("bioRxiv (2025)")
+# The authoritative list is the uncommented lines at the END of this file, one
+# per baselined finding. It is deliberately NOT duplicated in a comment: a second
+# copy is a second thing to drift, and this one did -- by 2026-09-15 three of the
+# five entries that used to sit above this note described findings already fixed
+# and deleted from the list below (why-this-works.html:35, :44, :58), so the file
+# advertised five known findings over a two-line baseline. To burn an entry down,
+# delete its line below; there is no comment to keep in step.
 science-of-shared-breath.html:114 NO AUTHOR
 shared-breathing-science.html:137 NO AUTHOR
