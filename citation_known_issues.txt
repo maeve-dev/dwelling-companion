@@ -26,6 +26,4 @@
 #   shared-breathing-science.html:137   journal in the author position ("bioRxiv (2025)")
 science-of-shared-breath.html:114 NO AUTHOR
 shared-breathing-science.html:137 NO AUTHOR
-why-this-works.html:35 NO AUTHOR
-why-this-works.html:44 NO AUTHOR
 why-this-works.html:58 NO AUTHOR
