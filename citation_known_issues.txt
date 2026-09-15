@@ -1,29 +1,29 @@
 # citation_known_issues.txt -- baseline for check_citations.py
-# Dated: 2026-09-15
+# Regenerated: 2026-09-15 by `python3 check_citations.py . --emit-baseline`
 #
 # THIS IS A BURN-DOWN LIST, NOT A PERMISSION SLIP.
 #
-# These are the malformed citations that already exist on the current tree.
-# They are recorded here only so that the (non-strict) CI run does not fail on
-# pre-existing debt while the debt is worked down. It is NOT a licence to add
-# more:
+# One `<file>:<line>` entry per finding -- the location of the
+# reference element (`<p class="ref">` or `<div class="ref-item">`).
+# Blank lines and `#` comments are ignored.
 #
-#   * `check_citations.py --strict` fails on ANY finding, baselined or not.
-#   * the non-strict run fails on any finding that is NOT listed below, so a
-#     NEW violation still fails the build.
+# These are the malformed citations that already exist on the tree.
+# They are listed only so that the NON-STRICT CI run does not fail on
+# pre-existing debt while the debt is worked down.  It is not a licence
+# to add more:
 #
-# When one of these is fixed, delete its line. Do not add lines to make a new
-# failure pass -- fix the citation instead.
+#   * `check_citations.py --strict` fails on ANY finding, listed or not.
+#   * the non-strict run fails on any finding NOT listed below, so a NEW
+#     violation still fails the build.
 #
-# Entries are "<file>:<line> <CHECK>". The line numbers are the location of
-# the reference container (the <p class="ref"> or <div class="ref-item">).
+# When one of these is fixed, delete its line.  Do not add a line to
+# make a new failure pass -- fix the citation instead.
 #
-# Known findings:
-#   why-this-works.html:35     journal in the author position ("Nature Scientific Reports (2025)")
-#   why-this-works.html:44     title-first ref: year follows the title, no author
-#   why-this-works.html:58     journal in the author position ("Frontiers in Cognition (2026)")
-#   science-of-shared-breath.html:114   journal in the author position ("Frontiers in Human Neuroscience (2022)")
-#   shared-breathing-science.html:137   journal in the author position ("bioRxiv (2025)")
-science-of-shared-breath.html:114 NO AUTHOR
-shared-breathing-science.html:137 NO AUTHOR
-why-this-works.html:58 NO AUTHOR
+# Known findings (what each baselined location is):
+#   science-of-shared-breath.html:114  [NO AUTHOR] author position holds a journal/preprint name ('Frontiers in Human Neuroscience'): Balconi & Angioletti (2023); Frontiers in Human Neuroscie
+#   shared-breathing-science.html:137  [NO AUTHOR] author position holds a journal/preprint name ('bioRxiv'): References: Lehrer & Gevirtz (2014), Vaschillo et al. (2006), Balconi & Angiolett
+#   why-this-works.html:58  [NO AUTHOR] author position holds a journal/preprint name ('Frontiers in Cognition'): Frontiers in Cognition (2026). Interbrain connectivity during mind
+#
+science-of-shared-breath.html:114
+shared-breathing-science.html:137
+why-this-works.html:58

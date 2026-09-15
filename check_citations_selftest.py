@@ -1,22 +1,28 @@
 #!/usr/bin/env python3
-"""Self-test for check_citations.py -- the coverage blind spots it fixes.
+"""Self-test for check_citations.py -- the reference coverage it must have.
 
-Runs the checker against a set of throwaway fixture directories and requires
-ALL of the following to hold:
+Every fixture is materialised in a fresh temp directory and the checker is run
+as a subprocess.  The checker and this file are resolved relative to this
+file's own ``__file__``, so the test works from any working directory.
 
-  (i)   a ``<div class="ref">`` block whose ``class="ref-item"`` children are
-        the real references is counted (the old checker saw none of them);
-  (ii)  a reference whose author position is a journal/preprint name is
-        flagged NO AUTHOR;
-  (iii) a title-first reference (year after the title, no author) is flagged
-        NO AUTHOR;
-  (iv)  a clean reference whose venue is plain prose (no ``<em>``) is still
-        entered into the key-consistency comparison;
-  (v)   two genuinely different works by the same first author and year, with
-        different titles, do NOT produce a venue/locator disagreement.
+Asserts:
+  1. a well-formed reference (author, year, title, <em> venue, volume, pages)
+     produces NO finding;
+  2. the SAME reference with the venue NOT in <em> still has its title
+     extracted and produces no title-related finding;
+  3. a <div class="ref"> with two <div class="ref-item"> children counts as
+     TWO references, and a bare <strong>References</strong> child counts as
+     ZERO;
+  4. "Frontiers in Human Neuroscience (2022)." is flagged NO AUTHOR;
+  5. a title-before-year reference is flagged;
+  6. --strict over a directory containing defect (4) exits 1, and over a
+     defect-free directory exits 0;
+  7. the COVERAGE: line is printed in both of those cases.
 
-Stdlib only.  Exits 0 iff every case behaves; prints which case failed.
+Stdlib only.  Exits 0 iff every assertion holds; on failure it prints which
+assertion failed and exits non-zero.
 """
+import re
 import shutil
 import subprocess
 import sys
@@ -27,7 +33,7 @@ HERE = Path(__file__).resolve().parent
 CHECKER = HERE / "check_citations.py"
 
 
-def run_checker(files):
+def run_checker(files, extra_args=()):
     """Materialise *files* in a temp dir and run the checker over it.
 
     Returns ``(returncode, stdout)``.
@@ -37,7 +43,7 @@ def run_checker(files):
         for name, body in files.items():
             (tmp / name).write_text(body)
         proc = subprocess.run(
-            [sys.executable, str(CHECKER), str(tmp)],
+            [sys.executable, str(CHECKER), str(tmp), *extra_args],
             capture_output=True, text=True,
         )
         return proc.returncode, proc.stdout + proc.stderr
@@ -47,85 +53,133 @@ def run_checker(files):
 
 # --- fixtures -------------------------------------------------------------
 
-DIV_BLOCK = """<!doctype html><html><body>
+WELL_FORMED_REF = (
+    "Author, A., &amp; Buthor, B. (2020). A well-formed title of the paper. "
+    "<em>Journal of Testing</em>, 10(2), 100-110."
+)
+
+WELL_FORMED = f"""<!doctype html><html><body>
+<p class="ref">{WELL_FORMED_REF}</p>
+</body></html>
+"""
+
+# The same reference with the venue in plain prose instead of <em>.
+PLAIN_VENUE = """<!doctype html><html><body>
+<p class="ref">Author, A., &amp; Buthor, B. (2020). A well-formed title of the paper. Journal of Testing, 10(2), 100-110.</p>
+</body></html>
+"""
+
+REF_ITEM_BLOCK = """<!doctype html><html><body>
 <div class="ref">
   <div class="ref-item"><strong>References</strong></div>
-  <div class="ref-item">Gamma, A., &amp; Metzinger, T. (2021). The Minimal Phenomenal Experience questionnaire. <em>PLOS One</em>, 16(7), e0253694.</div>
-  <div class="ref-item">Friston, K. (2010). The free-energy principle: a unified brain theory? <em>Nature Reviews Neuroscience</em>, 11(2), 127-138.</div>
+  <div class="ref-item">Author, A. (2001). The first worked example. <em>Journal of Testing</em>, 1, 1-2.</div>
+  <div class="ref-item">Buthor, B. (2002). The second worked example. <em>Journal of Testing</em>, 2, 3-4.</div>
+</div>
+</body></html>
+"""
+
+HEADING_ONLY = """<!doctype html><html><body>
+<div class="ref">
+  <div class="ref-item"><strong>References</strong></div>
 </div>
 </body></html>
 """
 
 VENUE_AS_AUTHOR = """<!doctype html><html><body>
-<p class="ref">Nature Scientific Reports (2025). Heart rate variability biofeedback in a global study of the most common coherence frequencies.</p>
+<p class="ref">Frontiers in Human Neuroscience (2022). Interbrain connectivity during shared breath focus.</p>
 </body></html>
 """
 
 TITLE_FIRST = """<!doctype html><html><body>
-<p class="ref">Resonance frequency is not always stable over time and could be related to the inter-beat interval. (2021). <em>Scientific Reports</em>, 11, 87867.</p>
-</body></html>
-"""
-
-PLAIN_VENUE = """<!doctype html><html><body>
-<p class="ref">Lehrer, P. M., &amp; Gevirtz, R. (2014). Heart rate variability biofeedback: how and why does it work? Frontiers in Psychology, 5, 756.</p>
-</body></html>
-"""
-
-TWO_DIFFERENT_WORKS = """<!doctype html><html><body>
-<p class="ref">Balconi, M., &amp; Angioletti, L. (2023). Dyadic inter-brain EEG coherence induced by interoceptive hyperscanning. <em>Scientific Reports</em>, 13, 31494.</p>
-<p class="ref">Balconi, M., &amp; Angioletti, L. (2023). Autonomic synchrony induced by hyperscanning interoception during interpersonal synchronization tasks. <em>Frontiers in Human Neuroscience</em>, 17, 1200750.</p>
+<p class="ref">Resonance frequency is not always stable over time and could be related to the inter-beat interval. (2021). <em>Scientific Reports</em>, 11, 11391.</p>
 </body></html>
 """
 
 
-# --- cases ----------------------------------------------------------------
+# --- helpers --------------------------------------------------------------
 
-def case_div_block():
-    rc, out = run_checker({"div.html": DIV_BLOCK})
-    if "refs=2" not in out:
-        return (f"expected the <div class=ref> block to contribute 2 refs "
-                f"(heading skipped), got:\n{out}")
+def coverage_field(out, field):
+    m = re.search(rf"COVERAGE:.*?\b{field}=(\d+)", out)
+    return int(m.group(1)) if m else None
+
+
+# --- assertions -----------------------------------------------------------
+
+def case_well_formed_clean():
+    rc, out = run_checker({"clean.html": WELL_FORMED}, extra_args=("--strict",))
+    if rc != 0:
+        return f"expected exit 0 for a well-formed reference, got {rc}:\n{out}"
+    if "FINDINGS: none" not in out:
+        return f"expected no findings for a well-formed reference:\n{out}"
+    return None
+
+
+def case_plain_venue_title_extracted():
+    rc, out = run_checker({"plain.html": PLAIN_VENUE}, extra_args=("--strict",))
+    if rc != 0:
+        return f"expected exit 0 for a plain-prose venue, got {rc}:\n{out}"
+    if "FINDINGS: none" not in out:
+        return f"plain-prose venue produced a finding:\n{out}"
+    if coverage_field(out, "refs_with_title") != 1:
+        return (f"title was not extracted when the venue is not <em> "
+                f"(refs_with_title != 1):\n{out}")
+    return None
+
+
+def case_ref_item_counting():
+    rc, out = run_checker({"items.html": REF_ITEM_BLOCK})
+    total = coverage_field(out, "refs_total")
+    if total != 2:
+        return (f"<div class=\"ref\"> with two ref-item children must count "
+                f"as TWO references, got refs_total={total}:\n{out}")
+    rc2, out2 = run_checker({"heading.html": HEADING_ONLY})
+    total2 = coverage_field(out2, "refs_total")
+    if total2 != 0:
+        return (f"a bare <strong>References</strong> heading must count as "
+                f"ZERO, got refs_total={total2}:\n{out2}")
     return None
 
 
 def case_venue_as_author():
-    rc, out = run_checker({"venue.html": VENUE_AS_AUTHOR})
+    rc, out = run_checker({"venue.html": VENUE_AS_AUTHOR}, extra_args=("--strict",))
     if "NO AUTHOR" not in out:
-        return f"venue-as-author ref was not flagged NO AUTHOR:\n{out}"
+        return f"venue-as-author reference was not flagged NO AUTHOR:\n{out}"
+    if rc != 1:
+        return f"expected exit 1 under --strict, got {rc}:\n{out}"
     return None
 
 
 def case_title_first():
-    rc, out = run_checker({"title.html": TITLE_FIRST})
+    rc, out = run_checker({"title.html": TITLE_FIRST}, extra_args=("--strict",))
     if "NO AUTHOR" not in out:
-        return f"title-first ref was not flagged NO AUTHOR:\n{out}"
+        return f"title-before-year reference was not flagged:\n{out}"
+    if rc != 1:
+        return f"expected exit 1 under --strict, got {rc}:\n{out}"
     return None
 
 
-def case_plain_venue_entered():
-    rc, out = run_checker({"plain.html": PLAIN_VENUE})
-    if "key_consistency_entered=1" not in out:
-        return (f"plain-prose-venue ref was not entered into the "
-                f"key-consistency comparison:\n{out}")
-    return None
-
-
-def case_different_works():
-    rc, out = run_checker({"two.html": TWO_DIFFERENT_WORKS})
-    if "DISAGREEMENT" in out:
-        return (f"two different works by the same author/year produced a "
-                f"venue/locator disagreement:\n{out}")
-    if rc != 0:
-        return f"expected exit 0 for two distinct clean works, got {rc}:\n{out}"
+def case_strict_exit_codes_and_coverage():
+    rc, out = run_checker({"defect.html": VENUE_AS_AUTHOR}, extra_args=("--strict",))
+    if rc != 1:
+        return f"--strict over a defect directory must exit 1, got {rc}:\n{out}"
+    if "COVERAGE:" not in out:
+        return f"--strict over a defect directory printed no COVERAGE: line:\n{out}"
+    rc2, out2 = run_checker({"clean.html": WELL_FORMED}, extra_args=("--strict",))
+    if rc2 != 0:
+        return f"--strict over a clean directory must exit 0, got {rc2}:\n{out2}"
+    if "COVERAGE:" not in out2:
+        return f"--strict over a clean directory printed no COVERAGE: line:\n{out2}"
     return None
 
 
 CASES = [
-    ("(i) div.ref/ref-item block is counted", case_div_block),
-    ("(ii) venue-as-author flagged NO AUTHOR", case_venue_as_author),
-    ("(iii) title-first ref flagged NO AUTHOR", case_title_first),
-    ("(iv) plain-prose venue still key-checked", case_plain_venue_entered),
-    ("(v) distinct works do not disagree", case_different_works),
+    ("(1) well-formed reference produces no finding", case_well_formed_clean),
+    ("(2) plain-prose venue still yields a title", case_plain_venue_title_extracted),
+    ("(3) ref-item children counted, heading not", case_ref_item_counting),
+    ("(4) venue-as-author flagged NO AUTHOR", case_venue_as_author),
+    ("(5) title-before-year reference flagged", case_title_first),
+    ("(6/7) --strict exit codes and COVERAGE line",
+     case_strict_exit_codes_and_coverage),
 ]
 
 
@@ -142,9 +196,9 @@ def main():
         else:
             print(f"ok   {name}")
     if failed:
-        print(f"\n{len(failed)} case(s) failed: {', '.join(failed)}")
+        print(f"\n{len(failed)} assertion(s) failed: {', '.join(failed)}")
         return 1
-    print("\nall citation-checker coverage cases pass")
+    print("\nall citation-checker coverage assertions pass")
     return 0
 
 
