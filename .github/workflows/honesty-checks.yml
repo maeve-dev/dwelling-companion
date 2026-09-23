@@ -11,6 +11,16 @@ name: honesty checks
 #     checker read CSS keyframes. Its selftest proves it is known to go red.
 #   * check_citations_selftest.py already existed and passed, but no workflow
 #     referenced it, so it had never run in CI.
+#
+# A third addition, same theme -- a page can also overclaim by WHEN it is:
+#   * check_freshness.py covers the freshness/liveness class ("live state",
+#     "updated when the ...", "always current"). dashboard.html shipped that
+#     claim while nothing regenerated it: `git log -- dashboard.html` returns
+#     two commits, both dated 2026-06-24, and the "pages build and deployment"
+#     run at 2026-09-23T18:18Z rebuilt the site without changing the snapshot.
+#     Its selftest proves it is known to go red AND that it keeps the honest
+#     "live calibration" / "live circle" feature wording out of the pattern
+#     list.
 on:
   push:
     branches: [master]
@@ -44,6 +54,9 @@ jobs:
       - name: check_breathing_antiphase.py (anti-phase invariant)
         run: python3 check_breathing_antiphase.py
 
+      - name: check_freshness.py (freshness/liveness overclaim phrasing)
+        run: python3 check_freshness.py
+
       # The selftests run after the checkers: a green checker whose own
       # coverage is broken is the more dangerous of the two.
       - name: check_citations_selftest.py (citation checker coverage)
@@ -51,3 +64,6 @@ jobs:
 
       - name: check_breathing_antiphase_selftest.py (anti-phase coverage)
         run: python3 check_breathing_antiphase_selftest.py
+
+      - name: check_freshness_selftest.py (freshness checker coverage)
+        run: python3 check_freshness_selftest.py
