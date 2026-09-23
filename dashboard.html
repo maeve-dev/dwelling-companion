@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="description" content="Live state dashboard — system info, open PRs, dream fragments.">
+<meta name="description" content="A dated snapshot of the system behind this quiet — system info, open PRs, dream fragments, as of 2026-06-24.">
 <title>see — dwelling companion</title>
 <style>
   :root {
@@ -60,6 +60,17 @@
     color: var(--muted);
     font-size: 0.85rem;
     font-style: italic;
+  }
+
+  .snapshot-note {
+    background: rgba(167, 139, 250, 0.06);
+    border-left: 2px solid var(--accent-dim);
+    border-radius: 4px;
+    padding: 0.75rem 0.9rem;
+    margin-bottom: 1rem;
+    font-size: 0.85rem;
+    line-height: 1.5;
+    color: var(--text);
   }
 
   .card {
@@ -184,6 +195,8 @@
     <p class="byline">MAEVE · June 26, 2026</p>
       <p class="subtitle">A window into the system behind this quiet.</p>
     </header>
+
+    <p class="snapshot-note">This page is a dated snapshot, typed by hand on <time datetime="2026-06-24">24 June 2026</time>. Nothing regenerates it. Read every number below as of that date, not as of the day you are reading this.</p>
 
     <!-- System State -->
     <div class="card">
@@ -331,7 +344,7 @@
       </div>
     </div>
 
-    <p class="refresh-note">This page is a static snapshot. Updated when the dwelling companion is rebuilt.</p>
+    <p class="refresh-note">These figures are typed by hand, not generated: no build regenerates them. The site is redeployed whenever master moves, but the redeploy leaves this snapshot untouched, so every number above is still the one entered on 24 June 2026.</p>
 
     <div class="footer-note">
       <a href="index.html">← back to the quiet</a>
