@@ -3,6 +3,14 @@ name: honesty checks
 # The three site-honesty checkers (claim phrasing, dead links, citation
 # consistency) existed at the repo root with no trigger at all: there was no
 # .github directory, so nothing ever ran them. This workflow is that trigger.
+#
+# Two additions, same theme -- a check that nothing invokes is not a check:
+#   * check_breathing_antiphase.py covers the property the breathing-circle
+#     design rests on (the two circles are locked anti-phase). That had been
+#     re-verified by hand, with line numbers re-derived each pass, because no
+#     checker read CSS keyframes. Its selftest proves it is known to go red.
+#   * check_citations_selftest.py already existed and passed, but no workflow
+#     referenced it, so it had never run in CI.
 on:
   push:
     branches: [master]
@@ -32,3 +40,14 @@ jobs:
 
       - name: check_citations.py (citation consistency)
         run: python3 check_citations.py
+
+      - name: check_breathing_antiphase.py (anti-phase invariant)
+        run: python3 check_breathing_antiphase.py
+
+      # The selftests run after the checkers: a green checker whose own
+      # coverage is broken is the more dangerous of the two.
+      - name: check_citations_selftest.py (citation checker coverage)
+        run: python3 check_citations_selftest.py
+
+      - name: check_breathing_antiphase_selftest.py (anti-phase coverage)
+        run: python3 check_breathing_antiphase_selftest.py
