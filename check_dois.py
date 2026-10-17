@@ -22,11 +22,25 @@ Checks (each finding, never a silent pass):
   4. LOCATOR MISMATCH -- volume / issue / pages disagree between the registry
      and the page, where the page states them.
 
+What this checker CAN see, since the cache ages even when the pages do not:
+
+  5. STALE CACHE -- the cache's ``fetched_at`` stamp is older than
+     ``DOI_CACHE_MAX_AGE_DAYS`` (default 180, override with ``--max-age-days``).
+     The per-DOI checks still run: a stale answer is still evidence, but the
+     staleness itself is a finding so CI goes red instead of quietly trusting a
+     snapshot that nothing schedules a refresh for.
+  6. UNDATED CACHE -- the cache has no ``fetched_at``, or it does not parse.
+     Absence of a stamp must never read as freshness.
+  7. FUTURE CACHE -- ``fetched_at`` is in the future relative to ``--now``.  That
+     is a broken stamp, not a fresh one.
+
 What this checker CANNOT see:
 
-  * It reads only the checked-in cache, never the network.  The cache is a
-    snapshot; a stale cache is a fresh risk that nothing yet schedules.  Only
-    ``--refresh`` touches Crossref, and it is run by hand.
+  * It reads only the checked-in cache, never the network.  Staleness of the
+    cache is now a finding (see above), but nothing here refreshes it: only
+    ``--refresh`` touches Crossref, and a human or a scheduled job must run it
+    and commit the result.  This checker makes staleness visible; it does not
+    schedule the refresh.
   * It cannot tell that a DOI resolves to a *retracted* or replaced record, only
     that the bibliographic metadata Crossref reports does not match the page.
   * It cannot compare a field the page does not state: a volume the page omits
@@ -42,6 +56,8 @@ Run from a repo root::
     python3 check_dois.py src             # check a subdirectory
     python3 check_dois.py src --strict    # exit 1 for ANY finding
     python3 check_dois.py . --refresh     # re-fetch the cache from Crossref
+    python3 check_dois.py . --max-age-days 90   # tighten the staleness limit
+    python3 check_dois.py . --now 2026-10-17T00:00:00Z   # pin the clock (selftest)
 
 ``--strict`` exits 1 for ANY finding.  Non-strict exits 0 only when every
 finding is listed in ``doi_known_issues.txt`` (which does not need to exist); a
@@ -81,6 +97,12 @@ USER_AGENT = ("dwelling-companion-doi-check/1.0 "
               "(https://github.com/maeve-dev/dwelling-companion)")
 
 YEAR_FIELDS = ("published-print", "issued", "published-online")
+
+# How old the checked-in snapshot may be before its age is itself a finding.
+# Nothing in this repo schedules a refresh, so without this the checker's
+# freshness would be unfalsifiable: it would exit 0 forever while the world
+# moved.  Override per run with --max-age-days.
+DOI_CACHE_MAX_AGE_DAYS: int = 180
 
 
 def clean(fragment):
@@ -251,12 +273,91 @@ def default_registry_path():
 
 
 def load_registry(path):
+    """Return ``(records, fetched_at_raw)`` for the checked-in cache.
+
+    ``fetched_at_raw`` is returned unparsed (``None`` when the key or the file is
+    absent) so the caller can report an undated cache as a finding rather than
+    silently treating the records as fresh.
+    """
     p = Path(path)
     if not p.exists():
-        return {}
+        return {}, None
     data = json.loads(p.read_text(errors="replace"))
-    return {k: v for k, v in data.items()
-            if k != "fetched_at" and isinstance(v, dict)}
+    records = {k: v for k, v in data.items()
+               if k != "fetched_at" and isinstance(v, dict)}
+    return records, data.get("fetched_at")
+
+
+def parse_stamp(raw):
+    """Parse an ISO-8601 stamp tolerantly (a trailing ``Z`` is UTC).
+
+    Returns an aware ``datetime`` in UTC, or ``None`` when the value is missing
+    or unparseable -- the caller must turn that ``None`` into a finding.
+    """
+    if not isinstance(raw, str):
+        return None
+    text = raw.strip()
+    if not text:
+        return None
+    if text[-1] in "Zz":
+        text = text[:-1] + "+00:00"
+    try:
+        stamp = datetime.datetime.fromisoformat(text)
+    except ValueError:
+        return None
+    if stamp.tzinfo is None:
+        stamp = stamp.replace(tzinfo=datetime.timezone.utc)
+    return stamp.astimezone(datetime.timezone.utc)
+
+
+def cache_findings(registry_path, fetched_at_raw, now, max_age_days):
+    """Return ``(findings, age_string)`` describing the cache's own freshness.
+
+    The age is counted in whole calendar days (UTC), so a cache fetched late
+    yesterday and checked early today is 1 day old -- the same answer at any
+    hour of the same day, which keeps the summary line deterministic.
+    """
+    name = Path(registry_path).name
+    refresh_hint = (f"run `python3 check_dois.py . --refresh` and commit "
+                    f"{name}")
+    stamp = parse_stamp(fetched_at_raw)
+
+    if stamp is None:
+        why = ("has no fetched_at stamp" if fetched_at_raw is None
+               else f"has an unparseable fetched_at stamp {fetched_at_raw!r}")
+        return ([{
+            "check": "UNDATED CACHE",
+            "loc": name,
+            "message": (f"{name} {why}, so the age of every answer in it is "
+                        f"unknown: an absent or broken stamp must not read as "
+                        f"freshness. {refresh_hint}"),
+        }], "undated")
+
+    age = (now.date() - stamp.date()).days
+    stamp_text = stamp.strftime("%Y-%m-%dT%H:%M:%SZ")
+    unit = "day" if abs(age) == 1 else "days"
+
+    if stamp > now:
+        return ([{
+            "check": "FUTURE CACHE",
+            "loc": name,
+            "message": (f"{name} is stamped {stamp_text}, which is {-age} {unit} "
+                        f"AFTER --now {now.strftime('%Y-%m-%dT%H:%M:%SZ')}: a "
+                        f"future stamp is a broken clock, not freshness, and "
+                        f"makes the cache's real age unknowable. {refresh_hint}"),
+        }], str(age))
+
+    if age > max_age_days:
+        return ([{
+            "check": "STALE CACHE",
+            "loc": name,
+            "message": (f"{name} was fetched at {stamp_text}, {age} {unit} ago, "
+                        f"which is older than max_age_days={max_age_days}: the "
+                        f"DOIs below were resolved against a snapshot that "
+                        f"nothing schedules a refresh for. {refresh_hint}"),
+        }], str(age))
+
+    return [], str(age)
 
 
 def fetch(doi):
@@ -336,10 +437,15 @@ def finding_key(f):
 
 # --- entry point ----------------------------------------------------------
 
-def run_check(root, registry_path):
+def run_check(root, registry_path, now, max_age_days):
     occurrences, pages = collect_dois(root)
-    registry = load_registry(registry_path)
-    findings = []
+    registry, fetched_at_raw = load_registry(registry_path)
+    # Cache-stamp findings come first: a stale answer is still evidence, so the
+    # per-DOI checks below still run, but the cache's own age is reported before
+    # anything read out of it.
+    stale, cache_age = cache_findings(registry_path, fetched_at_raw, now,
+                                      max_age_days)
+    findings = list(stale)
     matched_by = Counter()
     verified = 0
     for occurrence in occurrences:
@@ -365,6 +471,8 @@ def run_check(root, registry_path):
         "verified": verified,
         "findings": findings,
         "matched_by": matched_by,
+        "cache_findings": stale,
+        "cache_age": cache_age,
     }
 
 
@@ -378,14 +486,29 @@ def main(argv=None):
     ap.add_argument("--registry", default=None,
                     help="path to the checked-in DOI cache "
                          "(default: dois_registry.json next to this script)")
+    ap.add_argument("--max-age-days", type=int, default=DOI_CACHE_MAX_AGE_DAYS,
+                    help="how many days the cache may go without a refresh "
+                         f"before its age is a finding (default: "
+                         f"{DOI_CACHE_MAX_AGE_DAYS})")
+    ap.add_argument("--now", default=None,
+                    help="RFC3339 timestamp to treat as the current time "
+                         "(default: now, UTC) -- the selftest pins this so it "
+                         "never depends on the wall clock")
     args = ap.parse_args(argv)
+
+    if args.now is None:
+        now = datetime.datetime.now(datetime.timezone.utc)
+    else:
+        now = parse_stamp(args.now)
+        if now is None:
+            ap.error(f"--now {args.now!r} is not an RFC3339 timestamp")
 
     registry_path = Path(args.registry) if args.registry else default_registry_path()
 
     if args.refresh:
         return refresh(args.dir, registry_path)
 
-    result = run_check(args.dir, registry_path)
+    result = run_check(args.dir, registry_path, now, args.max_age_days)
     findings = result["findings"]
     matched = result["matched_by"]
 
@@ -396,17 +519,26 @@ def main(argv=None):
         f"distinct_dois={result['distinct']} "
         f"verified_occurrences={result['verified']} "
         f"unverified_occurrences={len(result['occurrences']) - result['verified']} "
-        f"year_candidates_matched=({matched_str})"
+        f"year_candidates_matched=({matched_str}) "
+        f"cache_age_days={result['cache_age']} "
+        f"max_age_days={args.max_age_days}"
     )
 
     known = load_baseline(baseline_path())
     new = [f for f in findings if finding_key(f) not in known]
     baselined = [f for f in findings if finding_key(f) in known]
 
+    # Cache-stamp findings print first, then the per-DOI findings in their
+    # original order: the cache's age is what the rest of the report rests on.
+    cache_keys = {finding_key(f) for f in result["cache_findings"]}
+    ordered = sorted(findings,
+                     key=lambda f: (0 if finding_key(f) in cache_keys else 1,
+                                    finding_key(f)))
+
     if findings:
         print(f"\nFINDINGS ({len(findings)}; "
               f"{len(baselined)} baselined, {len(new)} new):\n")
-        for f in sorted(findings, key=finding_key):
+        for f in ordered:
             tag = "baselined" if finding_key(f) in known else "NEW"
             print(f"  [{tag}] {f['check']} {f['loc']}\n      {f['message']}\n")
     else:
