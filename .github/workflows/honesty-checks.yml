@@ -21,6 +21,19 @@ name: honesty checks
 #     Its selftest proves it is known to go red AND that it keeps the honest
 #     "live calibration" / "live circle" feature wording out of the pattern
 #     list.
+#
+# A fourth addition, same theme -- a page can also overclaim by WHAT it cites:
+#   * check_dois.py resolves the DOI printed on each page against a checked-in
+#     Crossref snapshot (dois_registry.json) and checks the page's stated title,
+#     year and volume/issue/pages against it. The other citation checkers are
+#     closed-world -- they compare the pages to each other -- so a citation
+#     wrong in exactly the same way everywhere passes all four of them, and
+#     nothing in the repo had ever resolved a DOI. It reads the cache only, so
+#     CI stays hermetic and needs no network; a DOI missing from the cache is
+#     reported as a coverage gap. It cannot see a retracted/replaced record, a
+#     field the page omits, or a cache that has gone stale -- nothing yet
+#     schedules a refresh, so a stale snapshot is a fresh risk. Its selftest
+#     proves it is known to go red, hermetically (no network at all).
 on:
   push:
     branches: [master]
@@ -57,6 +70,9 @@ jobs:
       - name: check_freshness.py (freshness/liveness overclaim phrasing)
         run: python3 check_freshness.py
 
+      - name: check_dois.py (DOI resolves to the cited work)
+        run: python3 check_dois.py
+
       # The selftests run after the checkers: a green checker whose own
       # coverage is broken is the more dangerous of the two.
       - name: check_citations_selftest.py (citation checker coverage)
@@ -67,3 +83,6 @@ jobs:
 
       - name: check_freshness_selftest.py (freshness checker coverage)
         run: python3 check_freshness_selftest.py
+
+      - name: check_dois_selftest.py (DOI checker coverage, hermetic)
+        run: python3 check_dois_selftest.py
